@@ -279,10 +279,10 @@ class VsdxToSvgConverter:
             if not master or not master['path']:
                 # If no master geometry,    draw a simple rectangle
                 svg_path = f"M 0 0 L {shape_data['width']} 0 L {shape_data['width']} {shape_data['height']} L 0 {shape_data['height']} Z"
-                print(f"Shape {shape_id}: Using default rectangle (no master geometry)")
+                # print(f"Shape {shape_id}: Using default rectangle (no master geometry)")
             else:
                 svg_path = master['path']
-                print(f"Shape {shape_id}: Using master geometry from {shape_data['master_id']}")
+                # print(f"Shape {shape_id}: Using master geometry from {shape_data['master_id']}")
 
             # Calculate position. Visio's PinX/PinY is the center of the shape.
             # SVG's x/y is the top-left corner.
