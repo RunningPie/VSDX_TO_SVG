@@ -1,0 +1,366 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<Masters
+	xmlns='http://schemas.microsoft.com/office/visio/2012/main'
+	xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships' xml:space='preserve'>
+	<Master ID='2' NameU='Globe valves' IsCustomNameU='1' Name='Globe valves' IsCustomName='1' Prompt='Drag onto the page, then right-click to specify valve type.' IconSize='1' AlignName='2' MatchByName='0' IconUpdate='0' UniqueID='{28EAD011-000B-0000-8E40-00608CF305B2}' BaseID='{40D8E3CE-4518-4D73-AC7F-732D27B66B13}' PatternFlags='0' Hidden='0' MasterType='2'>
+		<PageSheet LineStyle='0' FillStyle='0' TextStyle='0'>
+			<Cell N='PageWidth' V='2' U='IN'/>
+			<Cell N='PageHeight' V='2' U='IN'/>
+			<Cell N='ShdwOffsetX' V='0.125' U='IN'/>
+			<Cell N='ShdwOffsetY' V='-0.125' U='IN'/>
+			<Cell N='PageScale' V='12' U='IN'/>
+			<Cell N='DrawingScale' V='12' U='IN'/>
+			<Cell N='DrawingSizeType' V='3'/>
+			<Cell N='DrawingScaleType' V='0'/>
+			<Cell N='InhibitSnap' V='0'/>
+			<Cell N='PageLockReplace' V='0' U='BOOL'/>
+			<Cell N='PageLockDuplicate' V='0' U='BOOL'/>
+			<Cell N='UIVisibility' V='0'/>
+			<Cell N='ShdwType' V='0'/>
+			<Cell N='ShdwObliqueAngle' V='0'/>
+			<Cell N='ShdwScaleFactor' V='1'/>
+			<Cell N='DrawingResizeType' V='1'/>
+			<Cell N='XRulerDensity' V='16'/>
+			<Cell N='YRulerDensity' V='16'/>
+			<Cell N='XGridSpacing' V='0' U='IN'/>
+			<Cell N='YGridSpacing' V='0' U='IN'/>
+			<Cell N='PrintPageOrientation' V='0'/>
+			<Cell N='PaperKind' V='19'/>
+			<Cell N='LangID' V='en-US' F='Inh'/>
+			<Cell N='ShapeKeywords' V='Globe,valve,pipe,flow,control,process,plant'/>
+			<Section N='Layer'>
+				<Row IX='0'>
+					<Cell N='Name' V='Valve'/>
+					<Cell N='Color' V='255'/>
+					<Cell N='Status' V='0'/>
+					<Cell N='Visible' V='1'/>
+					<Cell N='Print' V='1'/>
+					<Cell N='Active' V='0'/>
+					<Cell N='Lock' V='0'/>
+					<Cell N='Snap' V='1'/>
+					<Cell N='Glue' V='1'/>
+					<Cell N='NameUniv' V='Valve'/>
+					<Cell N='ColorTrans' V='0' F='No Formula'/>
+				</Row>
+				<Row IX='1'>
+					<Cell N='Name' V='Flow Controller'/>
+					<Cell N='Color' V='255'/>
+					<Cell N='Status' V='0'/>
+					<Cell N='Visible' V='1'/>
+					<Cell N='Print' V='1'/>
+					<Cell N='Active' V='0'/>
+					<Cell N='Lock' V='0'/>
+					<Cell N='Snap' V='1'/>
+					<Cell N='Glue' V='1'/>
+					<Cell N='NameUniv' V='Flow Controller'/>
+					<Cell N='ColorTrans' V='0'/>
+				</Row>
+			</Section>
+			<Section N='User'>
+				<Row N='IFCPropsInvisible'>
+					<Cell N='Value' V='1'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+				</Row>
+			</Section>
+		</PageSheet>
+		<Icon>
+AAABAAEAICAQAAAAAADoAgAAFgAAACgAAAAgAAAAQAAAAAEABAAAAAAAgAIAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAACAAACAAAAAgIAAgAAAAIAAgACAgAAAgICAAMDAwAAAAP8AAP8AAAD//wD/AAAA/w
+D/AP//AAD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAP
+AAAAAAAAAP/wAAAAAAAP/wAAAAAAAAD///AAAAAP//8AAAAAAAAA////AAAA////AAAAAAAAAP///
+wAAAP///wAAAAAAAAD///AAAAAP//8AAAAAAAAA//AAAAAAAA//AAAAAAAAAPAAAAAAAAAADwAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAD////////////////////////////////////////////////////////////////8//8//D/8
+P/wOcD/8AAA//AAAP/wAAD/8AAA//A5wP/w//D/8//8//////////////////////////////////
+////////////////////w==</Icon>
+		<Rel r:id='rId1'/>
+	</Master>
+	<Master ID='4' NameU='Dynamic connector' IsCustomNameU='1' Name='Dynamic connector' IsCustomName='1' Prompt='Drag onto the page, then drag the ends to gray dots on shapes (green indicates connection).' IconSize='1' AlignName='2' MatchByName='0' IconUpdate='0' UniqueID='{287CC7E5-001D-0000-8E40-00608CF305B2}' BaseID='{79C8CB3E-DD63-4113-89E5-C8DB19F54A03}' PatternFlags='0' Hidden='0' MasterType='541'>
+		<PageSheet LineStyle='0' FillStyle='0' TextStyle='0'>
+			<Cell N='PageWidth' V='3' U='IN'/>
+			<Cell N='PageHeight' V='3' U='IN'/>
+			<Cell N='ShdwOffsetX' V='0.125'/>
+			<Cell N='ShdwOffsetY' V='-0.125'/>
+			<Cell N='PageScale' V='1' U='IN_F'/>
+			<Cell N='DrawingScale' V='1' U='IN_F'/>
+			<Cell N='DrawingSizeType' V='4'/>
+			<Cell N='DrawingScaleType' V='0'/>
+			<Cell N='InhibitSnap' V='0'/>
+			<Cell N='PageLockReplace' V='0' U='BOOL'/>
+			<Cell N='PageLockDuplicate' V='0' U='BOOL'/>
+			<Cell N='UIVisibility' V='0'/>
+			<Cell N='ShdwType' V='0'/>
+			<Cell N='ShdwObliqueAngle' V='0'/>
+			<Cell N='ShdwScaleFactor' V='1'/>
+			<Cell N='DrawingResizeType' V='1'/>
+			<Cell N='PrintPageOrientation' V='0'/>
+			<Cell N='PaperKind' V='0'/>
+			<Cell N='LangID' V='en-US' F='Inh'/>
+			<Cell N='ShapeKeywords' V='Dynamic,connector,route,connect,line'/>
+			<Section N='Layer'>
+				<Row IX='0'>
+					<Cell N='Name' V='Connector'/>
+					<Cell N='Color' V='255'/>
+					<Cell N='Status' V='0'/>
+					<Cell N='Visible' V='1'/>
+					<Cell N='Print' V='1'/>
+					<Cell N='Active' V='0'/>
+					<Cell N='Lock' V='0'/>
+					<Cell N='Snap' V='1'/>
+					<Cell N='Glue' V='1'/>
+					<Cell N='NameUniv' V='Connector'/>
+					<Cell N='ColorTrans' V='0' F='No Formula'/>
+				</Row>
+			</Section>
+		</PageSheet>
+		<Icon>
+AAABAAEAICAQAAAAAADoAgAAFgAAACgAAAAgAAAAQAAAAAEABAAAAAAAgAIAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAACAAACAAAAAgIAAgAAAAIAAgACAgAAAgICAAMDAwAAAAP8AAP8AAAD//wD/AAAA/w
+D/AP//AAD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAeHh4eAAAAAAAAAAAAAAAAIAAAAcAAAAAAAAAAAAAADNzMzAIAAAAAAAAAAAAAAAAAAAwBw
+AAAAAAAAAAAAAw///wMAgAAAAAAAAAAAAHgP//8IeHh4eHh4eHAAAACAD/n/AwCAAAAAAACAAAAAc
+ACZkAAAcAAAAAAAcAAAAIAACTAAAIAAAAAAAIAAAABwAAAAAABwAAAAAABwAAAAgAAAMAAAgAAAAA
+AAgAAAAHAAADMzM3MzMzMAAHAAAACAAAAAAAAAAAADAACAAAAAcAAAAAAAcAAAAwAAcAAAAIAAAAA
+AAIAAAAMAAIAAAABwAAAAAABwAAADAABwAAAAgAAAAAAAgAAAAwAAgAAAAHAAAAAAAHAAM5MzMHAA
+AACAAAAAAACAAAmZADCAAAAAcAAAAAAAcAD/n/AwcAAAAIeHh4eHh4eA///wh4AAAAAAAAAAAABwA
+P//8DAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAHAAAHAAAAAAAAAAAAAAAACAAACAAAAAAAAAAA
+AAAAAAeHh4cAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAD/////////////////gH///79///4Df//8A3//+AN///AAAAf0A3/39Ad/9/eff/f3H3/3959/
+9/eAAPf3gAD39/989/f/fPf3/3z39/989/f/cBf3/2AX9/9gF/AAAAf//2Af//9gP///ff///33//
+/8B/////////////////w==</Icon>
+		<Rel r:id='rId2'/>
+	</Master>
+	<Master ID='5' NameU='Gate valve' IsCustomNameU='1' Name='Gate valve' IsCustomName='1' Prompt='Drag the shape onto the drawing page.' IconSize='1' AlignName='2' MatchByName='0' IconUpdate='0' UniqueID='{28C4A604-0002-0000-8E40-00608CF305B2}' BaseID='{A5AAD03F-8434-4FCD-9ACB-C51D0B043792}' PatternFlags='0' Hidden='0' MasterType='2'>
+		<PageSheet LineStyle='0' FillStyle='0' TextStyle='0'>
+			<Cell N='PageWidth' V='1' U='IN'/>
+			<Cell N='PageHeight' V='1' U='IN'/>
+			<Cell N='ShdwOffsetX' V='0.125' U='IN'/>
+			<Cell N='ShdwOffsetY' V='-0.125' U='IN'/>
+			<Cell N='PageScale' V='1' U='IN'/>
+			<Cell N='DrawingScale' V='1' U='IN'/>
+			<Cell N='DrawingSizeType' V='4'/>
+			<Cell N='DrawingScaleType' V='0'/>
+			<Cell N='InhibitSnap' V='0'/>
+			<Cell N='PageLockReplace' V='0' U='BOOL'/>
+			<Cell N='PageLockDuplicate' V='0' U='BOOL'/>
+			<Cell N='UIVisibility' V='0'/>
+			<Cell N='ShdwType' V='0'/>
+			<Cell N='ShdwObliqueAngle' V='0'/>
+			<Cell N='ShdwScaleFactor' V='1'/>
+			<Cell N='DrawingResizeType' V='1'/>
+			<Cell N='PrintPageOrientation' V='0'/>
+			<Cell N='PaperKind' V='0'/>
+			<Cell N='LangID' V='en-US' F='Inh'/>
+			<Cell N='ShapeKeywords' V='Gate,valve,fitting,process,engineering'/>
+			<Section N='User'>
+				<Row N='PEHideTags'>
+					<Cell N='Value' V='0' F='No Formula'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+				</Row>
+			</Section>
+			<Section N='Actions'>
+				<Row N='Row_1'>
+					<Cell N='Menu' V='Hide Co&amp;mponent Tags' F='IF(User.PEHideTags,"Show Co&amp;mponent Tags","Hide Co&amp;mponent Tags")'/>
+					<Cell N='Action' V='0' F='SETF(GetRef(User.PEHideTags),IF(User.PEHideTags,0,1))'/>
+					<Cell N='Checked' V='0'/>
+					<Cell N='Disabled' V='0'/>
+					<Cell N='ReadOnly' V='0' F='No Formula'/>
+					<Cell N='Invisible' V='0' F='No Formula'/>
+					<Cell N='BeginGroup' V='0' F='No Formula'/>
+					<Cell N='FlyoutChild' V='0' F='No Formula'/>
+					<Cell N='TagName' V='' F='No Formula'/>
+					<Cell N='ButtonFace' V='' F='No Formula'/>
+					<Cell N='SortKey' V='' F='No Formula'/>
+				</Row>
+			</Section>
+			<Section N='Layer'>
+				<Row IX='0'>
+					<Cell N='Name' V='Valve'/>
+					<Cell N='Color' V='255'/>
+					<Cell N='Status' V='0'/>
+					<Cell N='Visible' V='1'/>
+					<Cell N='Print' V='1'/>
+					<Cell N='Active' V='0'/>
+					<Cell N='Lock' V='0'/>
+					<Cell N='Snap' V='1'/>
+					<Cell N='Glue' V='1'/>
+					<Cell N='NameUniv' V='Valve'/>
+					<Cell N='ColorTrans' V='0'/>
+				</Row>
+			</Section>
+		</PageSheet>
+		<Icon>
+AAABAAEAICAQAAAAAADoAgAAFgAAACgAAAAgAAAAQAAAAAEABAAAAAAAgAIAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAACAAACAAAAAgIAAgAAAAIAAgACAgAAAgICAAMDAwAAAAP8AAP8AAAD//wD/AAAA/w
+D/AP//AAD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+A8AAAAAAAAAAPAAAAAAAAAP/wAAAAAAAP/wAAAAAAAAD///AAAAAP//8AAAAAAAAA////8AAP////
+AAAAAAAAAP////AAD////wAAAAAAAAD///AAAAAP//8AAAAAAAAA//AAAAAAAA//AAAAAAAAAPAAA
+AAAAAAADwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAD////////////////////////////////////////////////8//8//D/8P/wP8D/8A8A//AAA
+P/wAAD/8A8A//A/wP/w//D/8//8//////////////////////////////////////////////////
+////////////////////w==</Icon>
+		<Rel r:id='rId3'/>
+	</Master>
+	<Master ID='6' NameU='Major Pipeline' IsCustomNameU='1' Name='Major Pipeline' IsCustomName='1' Prompt='Drag onto the page, then drag the ends to gray dots on shapes (green indicates connection).' IconSize='1' AlignName='2' MatchByName='0' IconUpdate='0' UniqueID='{28C0E43C-0005-0000-8E40-00608CF305B2}' BaseID='{D5ECB8F9-E1C8-42F4-ABF3-90C67B557F69}' PatternFlags='0' Hidden='0' MasterType='541'>
+		<PageSheet LineStyle='0' FillStyle='0' TextStyle='0'>
+			<Cell N='PageWidth' V='4' U='IN'/>
+			<Cell N='PageHeight' V='4' U='IN'/>
+			<Cell N='ShdwOffsetX' V='0.125' U='IN'/>
+			<Cell N='ShdwOffsetY' V='-0.125' U='IN'/>
+			<Cell N='PageScale' V='1' U='IN'/>
+			<Cell N='DrawingScale' V='1' U='IN'/>
+			<Cell N='DrawingSizeType' V='4'/>
+			<Cell N='DrawingScaleType' V='0'/>
+			<Cell N='InhibitSnap' V='0'/>
+			<Cell N='PageLockReplace' V='0' U='BOOL'/>
+			<Cell N='PageLockDuplicate' V='0' U='BOOL'/>
+			<Cell N='UIVisibility' V='0'/>
+			<Cell N='ShdwType' V='0'/>
+			<Cell N='ShdwObliqueAngle' V='0'/>
+			<Cell N='ShdwScaleFactor' V='1'/>
+			<Cell N='DrawingResizeType' V='1'/>
+			<Cell N='PrintPageOrientation' V='0'/>
+			<Cell N='PaperKind' V='0'/>
+			<Cell N='LangID' V='en-US' F='Inh'/>
+			<Cell N='ShapeKeywords' V='Major,pipeline,process,engineering,'/>
+			<Section N='Layer'>
+				<Row IX='0'>
+					<Cell N='Name' V='Pipelines'/>
+					<Cell N='Color' V='255'/>
+					<Cell N='Status' V='0'/>
+					<Cell N='Visible' V='1'/>
+					<Cell N='Print' V='1'/>
+					<Cell N='Active' V='0'/>
+					<Cell N='Lock' V='0'/>
+					<Cell N='Snap' V='1'/>
+					<Cell N='Glue' V='1'/>
+					<Cell N='NameUniv' V='Pipelines'/>
+					<Cell N='ColorTrans' V='0'/>
+				</Row>
+			</Section>
+			<Section N='User'>
+				<Row N='PEHideTags'>
+					<Cell N='Value' V='0' F='No Formula'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+				</Row>
+			</Section>
+			<Section N='Actions'>
+				<Row N='Row_1'>
+					<Cell N='Menu' V='Hide Co&amp;mponent Tags' F='IF(User.PEHideTags,"Show Co&amp;mponent Tags","Hide Co&amp;mponent Tags")'/>
+					<Cell N='Action' V='0' F='SETF(GetRef(User.PEHideTags),IF(User.PEHideTags,0,1))'/>
+					<Cell N='Checked' V='0'/>
+					<Cell N='Disabled' V='0'/>
+					<Cell N='ReadOnly' V='0' F='No Formula'/>
+					<Cell N='Invisible' V='0' F='No Formula'/>
+					<Cell N='BeginGroup' V='0' F='No Formula'/>
+					<Cell N='FlyoutChild' V='0' F='No Formula'/>
+					<Cell N='TagName' V='' F='No Formula'/>
+					<Cell N='ButtonFace' V='' F='No Formula'/>
+					<Cell N='SortKey' V='' F='No Formula'/>
+				</Row>
+			</Section>
+		</PageSheet>
+		<Icon>
+AAABAAEAICAQAAAAAADoAgAAFgAAACgAAAAgAAAAQAAAAAEABAAAAAAAgAIAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAACAAACAAAAAgIAAgAAAAIAAgACAgAAAgICAAMDAwAAAAP8AAP8AAAD//wD/AAAA/w
+D/AP//AAD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAD////////////////////////////////////////////////////////////8AA///AAP//z/
+///8/////P////z////8/////P////z///AA///wAP///////////////////////////////////
+////////////////////w==</Icon>
+		<Rel r:id='rId4'/>
+	</Master>
+	<Master ID='7' NameU='Reducer' IsCustomNameU='1' Name='Reducer' IsCustomName='1' Prompt='Drag the shape onto the drawing page.' IconSize='1' AlignName='2' MatchByName='0' IconUpdate='0' UniqueID='{28C4E101-0019-0000-8E40-00608CF305B2}' BaseID='{4832C101-3C1A-418D-B9C7-58764CC5F3B8}' PatternFlags='0' Hidden='0' MasterType='2'>
+		<PageSheet LineStyle='0' FillStyle='0' TextStyle='0'>
+			<Cell N='PageWidth' V='1' U='IN'/>
+			<Cell N='PageHeight' V='1' U='IN'/>
+			<Cell N='ShdwOffsetX' V='0.125' U='IN'/>
+			<Cell N='ShdwOffsetY' V='-0.125' U='IN'/>
+			<Cell N='PageScale' V='1' U='IN'/>
+			<Cell N='DrawingScale' V='1' U='IN'/>
+			<Cell N='DrawingSizeType' V='3'/>
+			<Cell N='DrawingScaleType' V='0'/>
+			<Cell N='InhibitSnap' V='0'/>
+			<Cell N='PageLockReplace' V='0' U='BOOL'/>
+			<Cell N='PageLockDuplicate' V='0' U='BOOL'/>
+			<Cell N='UIVisibility' V='0'/>
+			<Cell N='ShdwType' V='0'/>
+			<Cell N='ShdwObliqueAngle' V='0'/>
+			<Cell N='ShdwScaleFactor' V='1'/>
+			<Cell N='DrawingResizeType' V='1'/>
+			<Cell N='PrintPageOrientation' V='0'/>
+			<Cell N='PaperKind' V='19'/>
+			<Cell N='LangID' V='en-US' F='Inh'/>
+			<Cell N='ShapeKeywords' V='Reducer,valve,fitting,process,engineering'/>
+			<Section N='User'>
+				<Row N='PEHideTags'>
+					<Cell N='Value' V='0' F='No Formula'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+				</Row>
+			</Section>
+			<Section N='Actions'>
+				<Row N='Row_1'>
+					<Cell N='Menu' V='Hide Co&amp;mponent Tags' F='IF(User.PEHideTags,"Show Co&amp;mponent Tags","Hide Co&amp;mponent Tags")'/>
+					<Cell N='Action' V='0' F='SETF(GetRef(User.PEHideTags),IF(User.PEHideTags,0,1))'/>
+					<Cell N='Checked' V='0'/>
+					<Cell N='Disabled' V='0'/>
+					<Cell N='ReadOnly' V='0' F='No Formula'/>
+					<Cell N='Invisible' V='0' F='No Formula'/>
+					<Cell N='BeginGroup' V='0' F='No Formula'/>
+					<Cell N='FlyoutChild' V='0' F='No Formula'/>
+					<Cell N='TagName' V='' F='No Formula'/>
+					<Cell N='ButtonFace' V='' F='No Formula'/>
+					<Cell N='SortKey' V='' F='No Formula'/>
+				</Row>
+			</Section>
+			<Section N='Layer'>
+				<Row IX='0'>
+					<Cell N='Name' V='Pipelines'/>
+					<Cell N='Color' V='255'/>
+					<Cell N='Status' V='0'/>
+					<Cell N='Visible' V='1'/>
+					<Cell N='Print' V='1'/>
+					<Cell N='Active' V='0'/>
+					<Cell N='Lock' V='0'/>
+					<Cell N='Snap' V='1'/>
+					<Cell N='Glue' V='1'/>
+					<Cell N='NameUniv' V='Pipelines'/>
+					<Cell N='ColorTrans' V='0'/>
+				</Row>
+			</Section>
+		</PageSheet>
+		<Icon>
+AAABAAEAICAQAAAAAADoAgAAFgAAACgAAAAgAAAAQAAAAAEABAAAAAAAgAIAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAACAAACAAAAAgIAAgAAAAIAAgACAgAAAgICAAMDAwAAAAP8AAP8AAAD//wD/AAAA/w
+D/AP//AAD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/8AAAAAAAAAAAAAAAA
+AAA////AAAAAAAAAAAAAAAAAP/////wAAAAAAAAAAAAAAD///////8AAAAAAAAAAAAA////////AA
+AAAAAAAAAAAP///////wAAAAAAAAAAAAD///////8AAAAAAAAAAAAA////////AAAAAAAAAAAAAP/
+//////wAAAAAAAAAAAAD///////8AAAAAAAAAAAAA////////AAAAAAAAAAAAAP/////wAAAAAAAA
+AAAAAAD///8AAAAAAAAAAAAAAAAA//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAD///////////////////////////////////////////+H////gP///4Af//+AAf//gAH//4AB
+//+AAf//gAH//4AB//+AAf//gAH//4AB//+AAf//gB///4D///+H/////////////////////////
+////////////////////w==</Icon>
+		<Rel r:id='rId5'/>
+	</Master>
+</Masters>

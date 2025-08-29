@@ -1,0 +1,339 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<MasterContents
+	xmlns='http://schemas.microsoft.com/office/visio/2012/main'
+	xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships' xml:space='preserve'>
+	<Shapes>
+		<Shape ID='9' Type='Group' LineStyle='7' FillStyle='7' TextStyle='7' UniqueID='{0A6C139B-34D6-4698-B945-5C73F84C841C}'>
+			<Cell N='PinX' V='0.1'/>
+			<Cell N='PinY' V='0.1'/>
+			<Cell N='Width' V='0.5'/>
+			<Cell N='Height' V='0.25'/>
+			<Cell N='LocPinX' V='0.25' F='Width*0.5'/>
+			<Cell N='LocPinY' V='0.125' F='Height*0.5'/>
+			<Cell N='Angle' V='0'/>
+			<Cell N='FlipX' V='0'/>
+			<Cell N='FlipY' V='0'/>
+			<Cell N='ResizeMode' V='0'/>
+			<Cell N='EventDblClick' V='0' F='OPENTEXTWIN()'/>
+			<Cell N='HelpTopic' V='Vis_TPP.chm!#47331'/>
+			<Cell N='Copyright' V='Copyright (c) 2012 Microsoft Corporation.  All rights reserved.'/>
+			<Cell N='LayerMember' V='0;1'/>
+			<Cell N='LockThemeEffects' V='1'/>
+			<Cell N='SelectMode' V='0'/>
+			<Cell N='IsSnapTarget' V='0'/>
+			<Cell N='DontMoveChildren' V='1'/>
+			<Cell N='TxtPinX' V='0.25' F='Controls.Row_1'/>
+			<Cell N='TxtPinY' V='-0.1222222222222216' F='Controls.Row_1.Y'/>
+			<Cell N='TxtWidth' V='0.88888888888888' U='PT' F='MAX(TEXTWIDTH(TheText),Char.Size*User.AntiScale*8)'/>
+			<Cell N='TxtHeight' V='0.2444444444444431' F='TEXTHEIGHT(TheText,TxtWidth)'/>
+			<Cell N='TxtLocPinX' V='0.44444444444444' U='PT' F='TxtWidth*0.5'/>
+			<Cell N='TxtLocPinY' V='0.1222222222222216' F='TxtHeight*0.5'/>
+			<Cell N='TxtAngle' V='0' F='IF(BITXOR(FlipX,FlipY),1,-1)*Angle'/>
+			<Cell N='ObjType' V='8'/>
+			<Cell N='Comment' V='&lt;no master&gt;' F='INDEX(0,INDEX(0,MASTERNAME(),":"),".")'/>
+			<Cell N='EffectSchemeIndex' V='0'/>
+			<Cell N='QuickStyleVariation' V='6'/>
+			<Section N='Control'>
+				<Row N='Row_1'>
+					<Cell N='X' V='0.25' F='Width*0.5'/>
+					<Cell N='Y' V='-0.1222222222222216' F='-1*TEXTHEIGHT(TheText,TEXTWIDTH(TheText))/2'/>
+					<Cell N='XDyn' V='0.25' F='Width/2'/>
+					<Cell N='YDyn' V='0.125' F='Height/2'/>
+					<Cell N='XCon' V='2' F='(Controls.Row_1&gt;Width/2)*2+2'/>
+					<Cell N='YCon' V='7' F='(Controls.Row_1.Y&gt;Height/2)*2+2+5*NOT(User.HasText)'/>
+					<Cell N='CanGlue' V='1'/>
+					<Cell N='Prompt' V='Reposition Text'/>
+				</Row>
+			</Section>
+			<Section N='Connection'>
+				<Row T='Connection' IX='0'>
+					<Cell N='X' V='-1.40998324127395E-16' F='Width*-2.8199664825479E-16'/>
+					<Cell N='Y' V='0.125' F='Height*0.5'/>
+					<Cell N='DirX' V='0' F='No Formula'/>
+					<Cell N='DirY' V='0' F='No Formula'/>
+					<Cell N='Type' V='0' F='No Formula'/>
+					<Cell N='AutoGen' V='0' F='No Formula'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+				</Row>
+				<Row T='Connection' IX='1'>
+					<Cell N='X' V='0.5' F='Width*1'/>
+					<Cell N='Y' V='0.125' F='Height*0.5'/>
+					<Cell N='DirX' V='0' F='No Formula'/>
+					<Cell N='DirY' V='0' F='No Formula'/>
+					<Cell N='Type' V='0' F='No Formula'/>
+					<Cell N='AutoGen' V='0' F='No Formula'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+				</Row>
+				<Row T='Connection' IX='2'>
+					<Cell N='X' V='0.25' F='Width*0.5'/>
+					<Cell N='Y' V='0.125' F='Height*0.5'/>
+					<Cell N='DirX' V='0' F='No Formula'/>
+					<Cell N='DirY' V='0' F='No Formula'/>
+					<Cell N='Type' V='0' F='No Formula'/>
+					<Cell N='AutoGen' V='0' F='No Formula'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+				</Row>
+			</Section>
+			<Section N='User'>
+				<Row N='subtype'>
+					<Cell N='Value' V='0' F='LOOKUP(Prop.subtype,Prop.subtype.Format)'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+				</Row>
+				<Row N='CH'>
+					<Cell N='Value' V='5' F='Sheet.12!User.CH'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+				</Row>
+				<Row N='AntiScale'>
+					<Cell N='Value' V='1' F='ThePage!DrawingScale/ThePage!PageScale'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+				</Row>
+				<Row N='HasText'>
+					<Cell N='Value' V='0' U='BOOL' F='NOT(OR(HideText,STRSAME(SHAPETEXT(TheText),"")))'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+				</Row>
+				<Row N='visVersion'>
+					<Cell N='Value' V='15'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+				</Row>
+				<Row N='SolSH'>
+					<Cell N='Value' V='{5D50005D-537C-4738-9C46-130C74335A6D}' U='STR'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+				</Row>
+				<Row N='ShapeClass'>
+					<Cell N='Value' V='3'/>
+					<Cell N='Prompt' V='Building Component' F='Prop.ShapeClass'/>
+				</Row>
+				<Row N='ShapeType'>
+					<Cell N='Value' V='16'/>
+					<Cell N='Prompt' V='Flow Controller' F='Prop.ShapeType'/>
+				</Row>
+				<Row N='SubShapeType'>
+					<Cell N='Value' V='90'/>
+					<Cell N='Prompt' V='Valve' F='Prop.SubShapeType'/>
+				</Row>
+			</Section>
+			<Section N='Property'>
+				<Row N='subtype'>
+					<Cell N='Value' V='Globe Valve 1' U='STR' F='INDEX(0,Prop.subtype.Format)'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+					<Cell N='Label' V='Valve type'/>
+					<Cell N='Format' V='Globe Valve 1;Globe Valve 2;Globe Valve 3'/>
+					<Cell N='SortKey' V='' F='No Formula'/>
+					<Cell N='Type' V='1'/>
+					<Cell N='Invisible' V='0' F='No Formula'/>
+					<Cell N='Verify' V='0' F='No Formula'/>
+					<Cell N='DataLinked' V='0' F='No Formula'/>
+					<Cell N='LangID' V='en-US'/>
+					<Cell N='Calendar' V='0' F='No Formula'/>
+				</Row>
+				<Row N='ShapeClass'>
+					<Cell N='Value' V='Building Component' U='STR'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+					<Cell N='Label' V='ShapeClass'/>
+					<Cell N='Format' V='' F='No Formula'/>
+					<Cell N='SortKey' V='' F='No Formula'/>
+					<Cell N='Type' V='0' F='No Formula'/>
+					<Cell N='Invisible' V='1'/>
+					<Cell N='Verify' V='0' F='No Formula'/>
+					<Cell N='DataLinked' V='0' F='No Formula'/>
+					<Cell N='LangID' V='en-US'/>
+					<Cell N='Calendar' V='0' F='No Formula'/>
+				</Row>
+				<Row N='ShapeType'>
+					<Cell N='Value' V='Flow Controller' U='STR'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+					<Cell N='Label' V='ShapeType'/>
+					<Cell N='Format' V='' F='No Formula'/>
+					<Cell N='SortKey' V='' F='No Formula'/>
+					<Cell N='Type' V='0' F='No Formula'/>
+					<Cell N='Invisible' V='1'/>
+					<Cell N='Verify' V='0' F='No Formula'/>
+					<Cell N='DataLinked' V='0' F='No Formula'/>
+					<Cell N='LangID' V='en-US'/>
+					<Cell N='Calendar' V='0' F='No Formula'/>
+				</Row>
+				<Row N='SubShapeType'>
+					<Cell N='Value' V='Valve' U='STR'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+					<Cell N='Label' V='SubShapeType'/>
+					<Cell N='Format' V='' F='No Formula'/>
+					<Cell N='SortKey' V='' F='No Formula'/>
+					<Cell N='Type' V='0' F='No Formula'/>
+					<Cell N='Invisible' V='1'/>
+					<Cell N='Verify' V='0' F='No Formula'/>
+					<Cell N='DataLinked' V='0' F='No Formula'/>
+					<Cell N='LangID' V='en-US'/>
+					<Cell N='Calendar' V='0' F='No Formula'/>
+				</Row>
+				<Row N='BaseElevation'>
+					<Cell N='Value' V='0' F='No Formula'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+					<Cell N='Label' V='Base elevation'/>
+					<Cell N='Format' V='' F='No Formula'/>
+					<Cell N='SortKey' V='' F='No Formula'/>
+					<Cell N='Type' V='2'/>
+					<Cell N='Invisible' V='0' F='No Formula'/>
+					<Cell N='Verify' V='0' F='No Formula'/>
+					<Cell N='DataLinked' V='0' F='No Formula'/>
+					<Cell N='LangID' V='en-US'/>
+					<Cell N='Calendar' V='0' F='No Formula'/>
+				</Row>
+				<Row N='ValveType'>
+					<Cell N='Value' V='0' F='No Formula'/>
+					<Cell N='Prompt' V='' F='No Formula'/>
+					<Cell N='Label' V='Valve type'/>
+					<Cell N='Format' V='' F='No Formula'/>
+					<Cell N='SortKey' V='' F='No Formula'/>
+					<Cell N='Type' V='0' F='No Formula'/>
+					<Cell N='Invisible' V='0' F='No Formula'/>
+					<Cell N='Verify' V='0' F='No Formula'/>
+					<Cell N='DataLinked' V='0' F='No Formula'/>
+					<Cell N='LangID' V='en-US'/>
+					<Cell N='Calendar' V='0' F='No Formula'/>
+				</Row>
+			</Section>
+			<Section N='Actions'>
+				<Row N='Row_1'>
+					<Cell N='Menu' V='%_P&amp;roperties...'/>
+					<Cell N='Action' V='0' F='DOCMD(1312)'/>
+					<Cell N='Checked' V='0'/>
+					<Cell N='Disabled' V='0'/>
+					<Cell N='ReadOnly' V='0' F='No Formula'/>
+					<Cell N='Invisible' V='0' F='No Formula'/>
+					<Cell N='BeginGroup' V='0' F='No Formula'/>
+					<Cell N='FlyoutChild' V='0' F='No Formula'/>
+					<Cell N='TagName' V='' F='No Formula'/>
+					<Cell N='ButtonFace' V='' F='No Formula'/>
+					<Cell N='SortKey' V='' F='No Formula'/>
+				</Row>
+			</Section>
+			<Section N='Character'>
+				<Row IX='0'>
+					<Cell N='Size' V='0.11111111111111' U='PT'/>
+				</Row>
+			</Section>
+			<Shapes>
+				<Shape ID='10' Type='Shape' LineStyle='7' FillStyle='2' TextStyle='7'>
+					<Cell N='PinX' V='0.25' F='Sheet.9!Width*0.5'/>
+					<Cell N='PinY' V='0.125' F='Sheet.9!Height*0.5'/>
+					<Cell N='Width' V='0.5' F='Sheet.9!Width*1'/>
+					<Cell N='Height' V='0.25' F='Sheet.9!Height*1'/>
+					<Cell N='LocPinX' V='0.25' F='Width*0.5'/>
+					<Cell N='LocPinY' V='0.125' F='Height*0.5'/>
+					<Cell N='Angle' V='0'/>
+					<Cell N='FlipX' V='0'/>
+					<Cell N='FlipY' V='0'/>
+					<Cell N='ResizeMode' V='0'/>
+					<Cell N='FillForegnd' V='1' F='IF(Sheet.9!User.subtype=2,0,1)'/>
+					<Cell N='FillPattern' V='1' F='THEMEVAL("FillPattern",1)'/>
+					<Cell N='LangID' V='en-US' F='Inh'/>
+					<Cell N='LayerMember' V='0;1'/>
+					<Cell N='Copyright' V='Copyright (c) 2012 Microsoft Corporation.  All rights reserved.'/>
+					<Cell N='FillGradientEnabled' V='0' F='THEMEVAL("FillGradientEnabled",FALSE)'/>
+					<Cell N='QuickStyleVariation' V='6'/>
+					<Section N='Geometry' IX='0'>
+						<Cell N='NoFill' V='0'/>
+						<Cell N='NoLine' V='0'/>
+						<Cell N='NoShow' V='0'/>
+						<Cell N='NoSnap' V='0' F='No Formula'/>
+						<Cell N='NoQuickDrag' V='0' F='No Formula'/>
+						<Row T='MoveTo' IX='1'>
+							<Cell N='X' V='0' F='Width*0'/>
+							<Cell N='Y' V='0.25' F='Height*1'/>
+						</Row>
+						<Row T='LineTo' IX='2'>
+							<Cell N='X' V='0.5' F='Width*1'/>
+							<Cell N='Y' V='0' F='Height*0'/>
+						</Row>
+						<Row T='LineTo' IX='3'>
+							<Cell N='X' V='0.5' F='Width*1'/>
+							<Cell N='Y' V='0.25' F='Height*1'/>
+						</Row>
+						<Row T='LineTo' IX='4'>
+							<Cell N='X' V='0' F='Width*0'/>
+							<Cell N='Y' V='0' F='Height*0'/>
+						</Row>
+						<Row T='LineTo' IX='5'>
+							<Cell N='X' V='0' F='Geometry1.X1'/>
+							<Cell N='Y' V='0.25' F='Geometry1.Y1'/>
+						</Row>
+					</Section>
+				</Shape>
+				<Shape ID='11' Type='Shape' LineStyle='7' FillStyle='8' TextStyle='7'>
+					<Cell N='PinX' V='0.25' F='Sheet.9!Width*0.5'/>
+					<Cell N='PinY' V='0.125' F='Sheet.9!Height*0.5'/>
+					<Cell N='Width' V='0.125' F='Sheet.9!Width*0.25'/>
+					<Cell N='Height' V='0.125' F='Sheet.9!Height*0.5'/>
+					<Cell N='LocPinX' V='0.0625' F='Width*0.5'/>
+					<Cell N='LocPinY' V='0.0625' F='Height*0.5'/>
+					<Cell N='Angle' V='0'/>
+					<Cell N='FlipX' V='0'/>
+					<Cell N='FlipY' V='0'/>
+					<Cell N='ResizeMode' V='0'/>
+					<Cell N='EventDblClick' V='0' F='OPENTEXTWIN()'/>
+					<Cell N='LayerMember' V='0;1'/>
+					<Cell N='Copyright' V='Copyright (c) 2012 Microsoft Corporation.  All rights reserved.'/>
+					<Section N='Geometry' IX='0'>
+						<Cell N='NoFill' V='0'/>
+						<Cell N='NoLine' V='0'/>
+						<Cell N='NoShow' V='0' F='IF(Sheet.9!User.subtype=0,0,1)'/>
+						<Cell N='NoSnap' V='0' F='No Formula'/>
+						<Cell N='NoQuickDrag' V='0' F='No Formula'/>
+						<Row T='MoveTo' IX='1'>
+							<Cell N='X' V='0' F='Width*0'/>
+							<Cell N='Y' V='0.0625' F='Height*0.5'/>
+						</Row>
+						<Row T='EllipticalArcTo' IX='2'>
+							<Cell N='X' V='0.125' F='Width*1'/>
+							<Cell N='Y' V='0.0625' F='Height*0.5'/>
+							<Cell N='A' V='0.0625' U='DL' F='Width*0.5'/>
+							<Cell N='B' V='0.125' U='DL' F='Height*1'/>
+							<Cell N='C' V='0' U='DA'/>
+							<Cell N='D' V='1' F='Width/Height*1'/>
+						</Row>
+						<Row T='EllipticalArcTo' IX='3'>
+							<Cell N='X' V='0' F='Geometry1.X1'/>
+							<Cell N='Y' V='0.0625' F='Geometry1.Y1'/>
+							<Cell N='A' V='0.0625' U='DL' F='Width*0.5'/>
+							<Cell N='B' V='0' U='DL' F='Height*0'/>
+							<Cell N='C' V='0' U='DA'/>
+							<Cell N='D' V='1' F='Width/Height*1'/>
+						</Row>
+					</Section>
+				</Shape>
+				<Shape ID='12' Type='Shape' LineStyle='7' FillStyle='7' TextStyle='7'>
+					<Cell N='PinX' V='0.25' F='Sheet.9!Controls.Row_1'/>
+					<Cell N='PinY' V='-0.1222222222222216' F='Sheet.9!Controls.Row_1.Y'/>
+					<Cell N='Width' V='0.8888888888888888' U='PT' F='MAX(TEXTWIDTH(TheText),8*Char.Size)'/>
+					<Cell N='Height' V='0.2444444444444444' F='TEXTHEIGHT(TheText,TxtWidth)'/>
+					<Cell N='LocPinX' V='0.4444444444444444' U='PT' F='Width*0.5'/>
+					<Cell N='LocPinY' V='0.1222222222222222' F='Height*0.5'/>
+					<Cell N='Angle' V='0' F='GRAVITY(Sheet.9!Angle,-60DEG,120DEG)'/>
+					<Cell N='FlipX' V='0'/>
+					<Cell N='FlipY' V='0'/>
+					<Cell N='ResizeMode' V='0'/>
+					<Cell N='EventDblClick' V='0' F='OPENTEXTWIN()'/>
+					<Cell N='LayerMember' V='0;1'/>
+					<Cell N='TxtPinX' V='0.4444444444444444' U='PT' F='Width*0.5'/>
+					<Cell N='TxtPinY' V='0.1222222222222222' F='Height*0.5'/>
+					<Cell N='TxtWidth' V='0.8888888888888888' U='PT' F='Width*1'/>
+					<Cell N='TxtHeight' V='0.2444444444444444' F='Height*1'/>
+					<Cell N='TxtLocPinX' V='0.4444444444444444' U='PT' F='TxtWidth*0.5'/>
+					<Cell N='TxtLocPinY' V='0.1222222222222222' F='TxtHeight*0.5'/>
+					<Cell N='TxtAngle' V='0'/>
+					<Cell N='Copyright' V='Copyright (c) 2012 Microsoft Corporation.  All rights reserved.'/>
+					<Cell N='QuickStyleVariation' V='6'/>
+					<Section N='User'>
+						<Row N='CH'>
+							<Cell N='Value' V='5' F='IF(TEXTWIDTH(TheText)-LeftMargin-RightMargin&gt;0.1PT,0,5)'/>
+							<Cell N='Prompt' V='' F='No Formula'/>
+						</Row>
+					</Section>
+					<Text>
+						<cp IX='0'/>
+					</Text>
+				</Shape>
+			</Shapes>
+		</Shape>
+	</Shapes>
+</MasterContents>

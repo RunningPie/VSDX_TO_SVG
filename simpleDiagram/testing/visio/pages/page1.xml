@@ -1,0 +1,624 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<PageContents
+	xmlns='http://schemas.microsoft.com/office/visio/2012/main'
+	xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships' xml:space='preserve'>
+	<Shapes>
+		<Shape ID='1' NameU='Globe valves' Name='Globe valves' Type='Group' Master='2'>
+			<Cell N='PinX' V='3.387931124775648'/>
+			<Cell N='PinY' V='6.250000179841607'/>
+			<Cell N='LayerMember' V='0;1'/>
+			<Cell N='Comment' V='Globe valves' F='Inh'/>
+			<Shapes>    
+				<Shape ID='2' Type='Shape' MasterShape='10'>
+					<Cell N='LayerMember' V='0;1'/>
+				</Shape>
+				<Shape ID='3' Type='Shape' MasterShape='11'>
+					<Cell N='LayerMember' V='0;1'/>
+				</Shape>
+				<Shape ID='4' Type='Shape' MasterShape='12'>
+					<Cell N='LayerMember' V='0;1'/>
+				</Shape>
+			</Shapes>
+		</Shape>
+		<Shape ID='5' NameU='Dynamic connector' Name='Dynamic connector' Type='Shape' Master='4'>
+			<Cell N='PinX' V='2.202586270275215' F='Inh'/>
+			<Cell N='PinY' V='7.756465740431015' F='Inh'/>
+			<Cell N='Width' V='0.25' F='GUARD(0.25DL)'/>
+			<Cell N='Height' V='-3.762931142759808' F='GUARD(EndY-BeginY)'/>
+			<Cell N='LocPinX' V='0.125' F='Inh'/>
+			<Cell N='LocPinY' V='-1.881465571379904' F='Inh'/>
+			<Cell N='BeginX' V='2.155172475807451'/>
+			<Cell N='BeginY' V='9.637931311810918'/>
+			<Cell N='EndX' V='2.250000064742979'/>
+			<Cell N='EndY' V='5.875000169051111'/>
+			<Cell N='LayerMember' V='2'/>
+			<Cell N='BegTrigger' V='1' F='_XFTRIGGER(Sheet.5!EventXFMod)'/>
+			<Cell N='EndTrigger' V='1' F='_XFTRIGGER(Sheet.5!EventXFMod)'/>
+			<Cell N='TxtPinX' V='0.07758620553223583'/>
+			<Cell N='TxtPinY' V='-1.928879365847668'/>
+			<Cell N='ConFixedCode' V='3'/>
+			<Section N='Geometry' IX='0'>
+				<Row T='MoveTo' IX='1'>
+					<Cell N='X' V='0.07758620553223583'/>
+					<Cell N='Y' V='0'/>
+				</Row>
+				<Row T='LineTo' IX='2'>
+					<Cell N='X' V='0.07758620553223583'/>
+					<Cell N='Y' V='-3.762931142759808'/>
+				</Row>
+				<Row T='LineTo' IX='3'>
+					<Cell N='X' V='0.1724137944677637'/>
+					<Cell N='Y' V='-3.762931142759808'/>
+				</Row>
+			</Section>
+		</Shape>
+		<Shape ID='7' NameU='Major Pipeline' Name='Major Pipeline' Type='Shape' Master='6'>
+			<Cell N='PinX' V='3.879310442066083' F='Inh'/>
+			<Cell N='PinY' V='4.000000129485957' F='Inh'/>
+			<Cell N='Width' V='1' F='GUARD(EndX-BeginX)'/>
+			<Cell N='Height' V='-1' F='GUARD(EndY-BeginY)'/>
+			<Cell N='LocPinX' V='0.5' F='Inh'/>
+			<Cell N='LocPinY' V='-0.5' F='Inh'/>
+			<Cell N='BeginX' V='3.379310442066083'/>
+			<Cell N='BeginY' V='4.500000129485957'/>
+			<Cell N='EndX' V='4.379310442066083'/>
+			<Cell N='EndY' V='3.500000129485957'/>
+			<Cell N='LayerMember' V='3'/>
+			<Cell N='BegTrigger' V='1' F='_XFTRIGGER(Sheet.7!EventXFMod)'/>
+			<Cell N='TxtPinX' V='0.4' U='PT' F='Inh'/>
+			<Cell N='TxtPinY' V='-0.8733333333333333' F='Inh'/>
+			<Section N='Control'>
+				<Row N='Row_1'>
+					<Cell N='X' V='0.4' U='PT' F='Inh'/>
+					<Cell N='Y' V='-0.8733333333333333' F='Inh'/>
+					<Cell N='XDyn' V='0.4' U='PT' F='Inh'/>
+					<Cell N='YDyn' V='-0.8733333333333333' F='Inh'/>
+				</Row>
+			</Section>
+			<Section N='Geometry' IX='0'>
+				<Row T='MoveTo' IX='1'>
+					<Cell N='X' V='0'/>
+					<Cell N='Y' V='0'/>
+				</Row>
+				<Row T='LineTo' IX='2'>
+					<Cell N='X' V='0'/>
+					<Cell N='Y' V='-1'/>
+				</Row>
+				<Row T='LineTo' IX='3'>
+					<Cell N='X' V='1'/>
+					<Cell N='Y' V='-1'/>
+				</Row>
+			</Section>
+		</Shape>
+		<Shape ID='9' NameU='Gate valve.9' Name='Gate valve.9' Type='Shape' Master='5'>
+			<Cell N='PinX' V='2.875000079130307'/>
+			<Cell N='PinY' V='7.750000223003593'/>
+			<Cell N='LayerMember' V='0'/>
+			<Cell N='ObjType' V='1'/>
+		</Shape>
+		<Shape ID='13' NameU='Reducer.13' Name='Reducer.13' Type='Shape' Master='7'>
+			<Cell N='PinX' V='2.392500057549314'/>
+			<Cell N='PinY' V='2.357500079130307'/>
+			<Cell N='LayerMember' V='3'/>
+			<Cell N='ObjType' V='1'/>
+		</Shape>
+		<Shape ID='14' Type='Group' LineStyle='3' FillStyle='3' TextStyle='3'>
+			<Cell N='PinX' V='5.603922587309247'/>
+			<Cell N='PinY' V='7.278985715570561'/>
+			<Cell N='Width' V='1.292155185064718'/>
+			<Cell N='Height' V='3.192029072415346'/>
+			<Cell N='LocPinX' V='0.6460775925323592' F='Width*0.5'/>
+			<Cell N='LocPinY' V='1.596014536207673' F='Height*0.5'/>
+			<Cell N='Angle' V='0'/>
+			<Cell N='FlipX' V='0'/>
+			<Cell N='FlipY' V='0'/>
+			<Cell N='ResizeMode' V='0'/>
+			<Cell N='QuickStyleVariation' V='2'/>
+			<Cell N='ObjType' V='8'/>
+			<Shapes>
+				<Shape ID='6' NameU='Gate valve' Name='Gate valve' Type='Shape' Master='5'>
+					<Cell N='PinX' V='0.135203729444281' F='Sheet.14!Width*0.10463428155304'/>
+					<Cell N='PinY' V='3.134181501298869' F='Sheet.14!Height*0.98187749240244'/>
+					<Cell N='Width' V='0.1156951422329558' F='Sheet.14!Width*0.089536569268312'/>
+					<Cell N='Height' V='0.1156951422329558' F='Sheet.14!Height*0.036245015195119'/>
+					<Cell N='LocPinX' V='0.05784757111647788' F='Inh'/>
+					<Cell N='LocPinY' V='0.05784757111647788' F='Inh'/>
+					<Cell N='LayerMember' V='0'/>
+					<Cell N='ObjType' V='1'/>
+					<Cell N='TxtPinX' V='0.05784757111647788' F='Inh'/>
+					<Cell N='TxtPinY' V='-0.1366841150013417' F='Inh'/>
+					<Section N='Control'>
+						<Row N='Row_1'>
+							<Cell N='X' V='0.05784757111647788' F='Inh'/>
+							<Cell N='Y' V='-0.1366841150013417' F='Inh'/>
+							<Cell N='XDyn' V='0.05784757111647788' F='Inh'/>
+							<Cell N='YDyn' V='0.05784757111647788' F='Inh'/>
+						</Row>
+					</Section>
+					<Section N='Connection'>
+						<Row T='Connection' IX='0'>
+							<Cell N='X' V='0.05784757111647788' F='Inh'/>
+							<Cell N='Y' V='0.05784757111647788' F='Inh'/>
+						</Row>
+						<Row T='Connection' IX='1'>
+							<Cell N='X' V='0.1156951422329558' F='Inh'/>
+							<Cell N='Y' V='0.05784757111647788' F='Inh'/>
+						</Row>
+						<Row T='Connection' IX='2'>
+							<Cell N='X' V='0' F='Inh'/>
+							<Cell N='Y' V='0.05784757111647788' F='Inh'/>
+						</Row>
+					</Section>
+					<Section N='Geometry' IX='0'>
+						<Row T='MoveTo' IX='1'>
+							<Cell N='X' V='0' F='Inh'/>
+							<Cell N='Y' V='0.08677135667471682' F='Inh'/>
+						</Row>
+						<Row T='LineTo' IX='2'>
+							<Cell N='X' V='0' F='Inh'/>
+							<Cell N='Y' V='0.02892378555823894' F='Inh'/>
+						</Row>
+						<Row T='LineTo' IX='3'>
+							<Cell N='X' V='0.1156951422329558' F='Inh'/>
+							<Cell N='Y' V='0.08677135667471682' F='Inh'/>
+						</Row>
+						<Row T='LineTo' IX='4'>
+							<Cell N='X' V='0.1156951422329558' F='Inh'/>
+							<Cell N='Y' V='0.02892378555823894' F='Inh'/>
+						</Row>
+						<Row T='LineTo' IX='5'>
+							<Cell N='X' V='0' F='Inh'/>
+							<Cell N='Y' V='0.08677135667471682' F='Inh'/>
+						</Row>
+					</Section>
+				</Shape>
+				<Shape ID='8' NameU='Major Pipeline.8' Name='Major Pipeline.8' Type='Shape' Master='6'>
+					<Cell N='PinX' V='0.4419554350071709' F='Inh'/>
+					<Cell N='PinY' V='1.874939587905845' F='Inh'/>
+					<Cell N='Width' V='0.4978082688928238' F='GUARD(EndX-BeginX)'/>
+					<Cell N='Height' V='-2.518483826786044' F='GUARD(EndY-BeginY)'/>
+					<Cell N='LocPinX' V='0.2489041344464119' F='Inh'/>
+					<Cell N='LocPinY' V='-1.259241913393022' F='Inh'/>
+					<Cell N='BeginX' V='0.193051300560759' F='PAR(PNT(Sheet.6!Connections.X2,Sheet.6!Connections.Y2))'/>
+					<Cell N='BeginY' V='3.134181501298867' F='PAR(PNT(Sheet.6!Connections.X2,Sheet.6!Connections.Y2))'/>
+					<Cell N='EndX' V='0.6908595694535828' F='Sheet.14!Width*0.53465681014079'/>
+					<Cell N='EndY' V='0.6156976745128234' F='Sheet.14!Height*0.19288598585568'/>
+					<Cell N='LayerMember' V='3'/>
+					<Cell N='BegTrigger' V='2' F='_XFTRIGGER(Sheet.6!EventXFMod)'/>
+					<Cell N='TxtPinX' V='0.8978082688928235' U='PT' F='Inh'/>
+					<Cell N='TxtPinY' V='0.1266666666666667' F='Inh'/>
+					<Section N='Control'>
+						<Row N='Row_1'>
+							<Cell N='X' V='0.8978082688928235' U='PT' F='Inh'/>
+							<Cell N='Y' V='0.1266666666666667' F='Inh'/>
+							<Cell N='XDyn' V='0.8978082688928235' U='PT' F='Inh'/>
+							<Cell N='YDyn' V='0.1266666666666667' F='Inh'/>
+							<Cell N='XCon' V='9' F='Inh'/>
+							<Cell N='YCon' V='4' F='Inh'/>
+						</Row>
+					</Section>
+					<Section N='Geometry' IX='0'>
+						<Row T='MoveTo' IX='1'>
+							<Cell N='X' V='0'/>
+							<Cell N='Y' V='0'/>
+						</Row>
+						<Row T='LineTo' IX='2'>
+							<Cell N='X' V='0.4978082688928236'/>
+							<Cell N='Y' V='0'/>
+						</Row>
+						<Row T='LineTo' IX='3'>
+							<Cell N='X' V='0.4978082688928236'/>
+							<Cell N='Y' V='-2.518483826786044'/>
+						</Row>
+					</Section>
+				</Shape>
+				<Shape ID='10' NameU='Major Pipeline.10' Name='Major Pipeline.10' Type='Shape' Master='6'>
+					<Cell N='PinX' V='0.05784757111647787' F='Inh'/>
+					<Cell N='PinY' V='1.581552643428553' F='Inh'/>
+					<Cell N='Width' V='-0.25' F='GUARD(-0.25DL)'/>
+					<Cell N='Height' V='-3.105257715740629' F='GUARD(EndY-BeginY)'/>
+					<Cell N='LocPinX' V='-0.125' F='Inh'/>
+					<Cell N='LocPinY' V='-1.552628857870315' F='Inh'/>
+					<Cell N='BeginX' V='0.07735615832780329' F='PAR(PNT(Sheet.6!Connections.X3,Sheet.6!Connections.Y3))'/>
+					<Cell N='BeginY' V='3.134181501298867' F='PAR(PNT(Sheet.6!Connections.X3,Sheet.6!Connections.Y3))'/>
+					<Cell N='EndX' V='0.03833898390515245' F='PAR(PNT(Sheet.11!Connections.X3,Sheet.11!Connections.Y3))'/>
+					<Cell N='EndY' V='0.02892378555823871' F='PAR(PNT(Sheet.11!Connections.X3,Sheet.11!Connections.Y3))'/>
+					<Cell N='LayerMember' V='3'/>
+					<Cell N='BegTrigger' V='2' F='_XFTRIGGER(Sheet.6!EventXFMod)'/>
+					<Cell N='EndTrigger' V='2' F='_XFTRIGGER(Sheet.11!EventXFMod)'/>
+					<Cell N='TxtPinX' V='0.196807585173584' U='PT' F='Inh'/>
+					<Cell N='TxtPinY' V='0.1266666666666667' F='Inh'/>
+					<Cell N='ConFixedCode' V='3'/>
+					<Section N='Control'>
+						<Row N='Row_1'>
+							<Cell N='X' V='0.196807585173584' U='PT' F='Inh'/>
+							<Cell N='Y' V='0.1266666666666667' F='Inh'/>
+							<Cell N='XDyn' V='0.196807585173584' U='PT' F='Inh'/>
+							<Cell N='YDyn' V='0.1266666666666667' F='Inh'/>
+							<Cell N='XCon' V='9' F='Inh'/>
+							<Cell N='YCon' V='4' F='Inh'/>
+						</Row>
+					</Section>
+					<Section N='Geometry' IX='0'>
+						<Row T='MoveTo' IX='1'>
+							<Cell N='X' V='-0.1054914127886746'/>
+							<Cell N='Y' V='0'/>
+						</Row>
+						<Row T='LineTo' IX='2'>
+							<Cell N='X' V='-0.2031924148264159'/>
+							<Cell N='Y' V='0'/>
+						</Row>
+						<Row T='LineTo' IX='3'>
+							<Cell N='X' V='-0.2031924148264159'/>
+							<Cell N='Y' V='-3.105257715740629'/>
+						</Row>
+						<Row T='LineTo' IX='4'>
+							<Cell N='X' V='-0.1445085872113254'/>
+							<Cell N='Y' V='-3.105257715740629'/>
+						</Row>
+					</Section>
+				</Shape>
+				<Shape ID='11' NameU='Reducer' Name='Reducer' Type='Shape' Master='7'>
+					<Cell N='PinX' V='0.06726276946339162' F='Sheet.14!Width*0.052054714666507'/>
+					<Cell N='PinY' V='0.02892378555823894' F='Sheet.14!Height*0.0090612537987797'/>
+					<Cell N='Width' V='0.05784757111647788' F='Sheet.14!Width*0.044768284634156'/>
+					<Cell N='Height' V='0.05784757111647788' F='Sheet.14!Height*0.018122507597559'/>
+					<Cell N='LocPinX' V='0.02892378555823894' F='Inh'/>
+					<Cell N='LocPinY' V='0.02892378555823894' F='Inh'/>
+					<Cell N='LayerMember' V='3'/>
+					<Cell N='ObjType' V='1'/>
+					<Cell N='TxtPinX' V='0.02892378555823894' F='Inh'/>
+					<Cell N='TxtPinY' V='-0.129453168611782' F='Inh'/>
+					<Section N='Control'>
+						<Row N='Row_1'>
+							<Cell N='X' V='0.02892378555823894' F='Inh'/>
+							<Cell N='Y' V='-0.129453168611782' F='Inh'/>
+							<Cell N='XDyn' V='0.02892378555823894' F='Inh'/>
+							<Cell N='YDyn' V='0.02892378555823894' F='Inh'/>
+						</Row>
+					</Section>
+					<Section N='Connection'>
+						<Row T='Connection' IX='0'>
+							<Cell N='X' V='0.02892378555823894' F='Inh'/>
+							<Cell N='Y' V='0.02892378555823894' F='Inh'/>
+						</Row>
+						<Row T='Connection' IX='1'>
+							<Cell N='X' V='0.05784757111647788' F='Inh'/>
+							<Cell N='Y' V='0.02892378555823894' F='Inh'/>
+						</Row>
+						<Row T='Connection' IX='2'>
+							<Cell N='X' V='0' F='Inh'/>
+							<Cell N='Y' V='0.02892378555823894' F='Inh'/>
+						</Row>
+					</Section>
+					<Section N='Geometry' IX='0'>
+						<Row T='MoveTo' IX='1'>
+							<Cell N='X' V='0' F='Inh'/>
+							<Cell N='Y' V='0.05784757111647788' F='Inh'/>
+						</Row>
+						<Row T='LineTo' IX='2'>
+							<Cell N='X' V='0.05784757111647788' F='Inh'/>
+							<Cell N='Y' V='0.04338567833735841' F='Inh'/>
+						</Row>
+						<Row T='LineTo' IX='3'>
+							<Cell N='X' V='0.05784757111647788' F='Inh'/>
+							<Cell N='Y' V='0.01446189277911947' F='Inh'/>
+						</Row>
+						<Row T='LineTo' IX='4'>
+							<Cell N='X' V='0' F='Inh'/>
+							<Cell N='Y' V='0' F='Inh'/>
+						</Row>
+						<Row T='LineTo' IX='5'>
+							<Cell N='X' V='0' F='Inh'/>
+							<Cell N='Y' V='0.05784757111647788' F='Inh'/>
+						</Row>
+					</Section>
+				</Shape>
+				<Shape ID='12' NameU='Major Pipeline.12' Name='Major Pipeline.12' Type='Shape' Master='6'>
+					<Cell N='PinX' V='0.6941708700431747' F='Inh'/>
+					<Cell N='PinY' V='0.1405696094648493' F='Inh'/>
+					<Cell N='Width' V='1.195968630043088' F='GUARD(EndX-BeginX)'/>
+					<Cell N='Height' V='0.25' F='GUARD(0.25DL)'/>
+					<Cell N='LocPinX' V='0.5979843150215439' F='Inh'/>
+					<Cell N='LocPinY' V='0.125' F='Inh'/>
+					<Cell N='BeginX' V='0.09618655502163076' F='PAR(PNT(Sheet.11!Connections.X2,Sheet.11!Connections.Y2))'/>
+					<Cell N='BeginY' V='0.02892378555823871' F='PAR(PNT(Sheet.11!Connections.X2,Sheet.11!Connections.Y2))'/>
+					<Cell N='EndX' V='1.292155185064719' F='Sheet.14!Width*1'/>
+					<Cell N='EndY' V='0.2522154333714598' F='Sheet.14!Height*0.079014140425925'/>
+					<Cell N='LayerMember' V='3'/>
+					<Cell N='BegTrigger' V='2' F='_XFTRIGGER(Sheet.11!EventXFMod)'/>
+					<Cell N='TxtPinX' V='1.595968630043088' U='PT' F='Inh'/>
+					<Cell N='TxtPinY' V='0.1400208427600559' F='Inh'/>
+					<Section N='Control'>
+						<Row N='Row_1'>
+							<Cell N='X' V='1.595968630043088' U='PT' F='Inh'/>
+							<Cell N='Y' V='0.1400208427600559' F='Inh'/>
+							<Cell N='XDyn' V='1.595968630043088' U='PT' F='Inh'/>
+							<Cell N='YDyn' V='0.1400208427600559' F='Inh'/>
+							<Cell N='XCon' V='9' F='Inh'/>
+							<Cell N='YCon' V='4' F='Inh'/>
+						</Row>
+					</Section>
+					<Section N='Geometry' IX='0'>
+						<Row T='MoveTo' IX='1'>
+							<Cell N='X' V='0'/>
+							<Cell N='Y' V='0.01335417609338929'/>
+						</Row>
+						<Row T='LineTo' IX='2'>
+							<Cell N='X' V='1.195968630043088'/>
+							<Cell N='Y' V='0.01335417609338929'/>
+						</Row>
+						<Row T='LineTo' IX='3'>
+							<Cell N='X' V='1.195968630043088'/>
+							<Cell N='Y' V='0.2366458239066107'/>
+						</Row>
+					</Section>
+				</Shape>
+			</Shapes>
+		</Shape>
+		<Shape ID='15' Type='Group' LineStyle='3' FillStyle='3' TextStyle='3'>
+			<Cell N='PinX' V='6.000000172647942'/>
+			<Cell N='PinY' V='2.846014572175994'/>
+			<Cell N='Width' V='1.292155185064718'/>
+			<Cell N='Height' V='3.192029072415346'/>
+			<Cell N='LocPinX' V='0.6460775925323592' F='Width*0.5'/>
+			<Cell N='LocPinY' V='1.596014536207673' F='Height*0.5'/>
+			<Cell N='Angle' V='0'/>
+			<Cell N='FlipX' V='0'/>
+			<Cell N='FlipY' V='0'/>
+			<Cell N='ResizeMode' V='0'/>
+			<Cell N='QuickStyleVariation' V='2'/>
+			<Cell N='ObjType' V='8'/>
+			<Shapes>
+				<Shape ID='16' NameU='Gate valve' Name='Gate valve' Type='Shape' Master='5'>
+					<Cell N='PinX' V='0.135203729444281' F='Sheet.15!Width*0.10463428155304'/>
+					<Cell N='PinY' V='3.134181501298869' F='Sheet.15!Height*0.98187749240244'/>
+					<Cell N='Width' V='0.1156951422329558' F='Sheet.15!Width*0.089536569268312'/>
+					<Cell N='Height' V='0.1156951422329558' F='Sheet.15!Height*0.036245015195119'/>
+					<Cell N='LocPinX' V='0.05784757111647788' F='Inh'/>
+					<Cell N='LocPinY' V='0.05784757111647788' F='Inh'/>
+					<Cell N='LayerMember' V='0'/>
+					<Cell N='ObjType' V='1'/>
+					<Cell N='TxtPinX' V='0.05784757111647788' F='Inh'/>
+					<Cell N='TxtPinY' V='-0.1366841150013417' F='Inh'/>
+					<Section N='Control'>
+						<Row N='Row_1'>
+							<Cell N='X' V='0.05784757111647788' F='Inh'/>
+							<Cell N='Y' V='-0.1366841150013417' F='Inh'/>
+							<Cell N='XDyn' V='0.05784757111647788' F='Inh'/>
+							<Cell N='YDyn' V='0.05784757111647788' F='Inh'/>
+						</Row>
+					</Section>
+					<Section N='Connection'>
+						<Row T='Connection' IX='0'>
+							<Cell N='X' V='0.05784757111647788' F='Inh'/>
+							<Cell N='Y' V='0.05784757111647788' F='Inh'/>
+						</Row>
+						<Row T='Connection' IX='1'>
+							<Cell N='X' V='0.1156951422329558' F='Inh'/>
+							<Cell N='Y' V='0.05784757111647788' F='Inh'/>
+						</Row>
+						<Row T='Connection' IX='2'>
+							<Cell N='X' V='0' F='Inh'/>
+							<Cell N='Y' V='0.05784757111647788' F='Inh'/>
+						</Row>
+					</Section>
+					<Section N='Geometry' IX='0'>
+						<Row T='MoveTo' IX='1'>
+							<Cell N='X' V='0' F='Inh'/>
+							<Cell N='Y' V='0.08677135667471682' F='Inh'/>
+						</Row>
+						<Row T='LineTo' IX='2'>
+							<Cell N='X' V='0' F='Inh'/>
+							<Cell N='Y' V='0.02892378555823894' F='Inh'/>
+						</Row>
+						<Row T='LineTo' IX='3'>
+							<Cell N='X' V='0.1156951422329558' F='Inh'/>
+							<Cell N='Y' V='0.08677135667471682' F='Inh'/>
+						</Row>
+						<Row T='LineTo' IX='4'>
+							<Cell N='X' V='0.1156951422329558' F='Inh'/>
+							<Cell N='Y' V='0.02892378555823894' F='Inh'/>
+						</Row>
+						<Row T='LineTo' IX='5'>
+							<Cell N='X' V='0' F='Inh'/>
+							<Cell N='Y' V='0.08677135667471682' F='Inh'/>
+						</Row>
+					</Section>
+				</Shape>
+				<Shape ID='17' NameU='Major Pipeline.8' Name='Major Pipeline.8' Type='Shape' Master='6'>
+					<Cell N='PinX' V='0.4419554350071709' F='Inh'/>
+					<Cell N='PinY' V='1.874939587905846' F='Inh'/>
+					<Cell N='Width' V='0.4978082688928238' F='GUARD(EndX-BeginX)'/>
+					<Cell N='Height' V='-2.518483826786046' F='GUARD(EndY-BeginY)'/>
+					<Cell N='LocPinX' V='0.2489041344464119' F='Inh'/>
+					<Cell N='LocPinY' V='-1.259241913393022' F='Inh'/>
+					<Cell N='BeginX' V='0.193051300560759' F='PAR(PNT(Sheet.16!Connections.X2,Sheet.16!Connections.Y2))'/>
+					<Cell N='BeginY' V='3.134181501298869' F='PAR(PNT(Sheet.16!Connections.X2,Sheet.16!Connections.Y2))'/>
+					<Cell N='EndX' V='0.6908595694535828' F='Sheet.15!Width*0.53465681014079'/>
+					<Cell N='EndY' V='0.6156976745128234' F='Sheet.15!Height*0.19288598585568'/>
+					<Cell N='LayerMember' V='3'/>
+					<Cell N='BegTrigger' V='2' F='_XFTRIGGER(Sheet.16!EventXFMod)'/>
+					<Cell N='TxtPinX' V='0.8978082688928235' U='PT' F='Inh'/>
+					<Cell N='TxtPinY' V='0.1266666666666667' F='Inh'/>
+					<Section N='Control'>
+						<Row N='Row_1'>
+							<Cell N='X' V='0.8978082688928235' U='PT' F='Inh'/>
+							<Cell N='Y' V='0.1266666666666667' F='Inh'/>
+							<Cell N='XDyn' V='0.8978082688928235' U='PT' F='Inh'/>
+							<Cell N='YDyn' V='0.1266666666666667' F='Inh'/>
+							<Cell N='XCon' V='9' F='Inh'/>
+							<Cell N='YCon' V='4' F='Inh'/>
+						</Row>
+					</Section>
+					<Section N='Geometry' IX='0'>
+						<Row T='MoveTo' IX='1'>
+							<Cell N='X' V='0'/>
+							<Cell N='Y' V='0'/>
+						</Row>
+						<Row T='LineTo' IX='2'>
+							<Cell N='X' V='0.4978082688928236'/>
+							<Cell N='Y' V='0'/>
+						</Row>
+						<Row T='LineTo' IX='3'>
+							<Cell N='X' V='0.4978082688928236'/>
+							<Cell N='Y' V='-2.518483826786043'/>
+						</Row>
+					</Section>
+				</Shape>
+				<Shape ID='18' NameU='Major Pipeline.10' Name='Major Pipeline.10' Type='Shape' Master='6'>
+					<Cell N='PinX' V='0.05784757111647787' F='Inh'/>
+					<Cell N='PinY' V='1.581552643428554' F='Inh'/>
+					<Cell N='Width' V='-0.25' F='GUARD(-0.25DL)'/>
+					<Cell N='Height' V='-3.10525771574063' F='GUARD(EndY-BeginY)'/>
+					<Cell N='LocPinX' V='-0.125' F='Inh'/>
+					<Cell N='LocPinY' V='-1.552628857870315' F='Inh'/>
+					<Cell N='BeginX' V='0.07735615832780329' F='PAR(PNT(Sheet.16!Connections.X3,Sheet.16!Connections.Y3))'/>
+					<Cell N='BeginY' V='3.134181501298869' F='PAR(PNT(Sheet.16!Connections.X3,Sheet.16!Connections.Y3))'/>
+					<Cell N='EndX' V='0.03833898390515245' F='PAR(PNT(Sheet.19!Connections.X3,Sheet.19!Connections.Y3))'/>
+					<Cell N='EndY' V='0.02892378555823894' F='PAR(PNT(Sheet.19!Connections.X3,Sheet.19!Connections.Y3))'/>
+					<Cell N='LayerMember' V='3'/>
+					<Cell N='BegTrigger' V='2' F='_XFTRIGGER(Sheet.16!EventXFMod)'/>
+					<Cell N='EndTrigger' V='2' F='_XFTRIGGER(Sheet.19!EventXFMod)'/>
+					<Cell N='TxtPinX' V='0.196807585173584' U='PT' F='Inh'/>
+					<Cell N='TxtPinY' V='0.1266666666666667' F='Inh'/>
+					<Cell N='ConFixedCode' V='3'/>
+					<Section N='Control'>
+						<Row N='Row_1'>
+							<Cell N='X' V='0.196807585173584' U='PT' F='Inh'/>
+							<Cell N='Y' V='0.1266666666666667' F='Inh'/>
+							<Cell N='XDyn' V='0.196807585173584' U='PT' F='Inh'/>
+							<Cell N='YDyn' V='0.1266666666666667' F='Inh'/>
+							<Cell N='XCon' V='9' F='Inh'/>
+							<Cell N='YCon' V='4' F='Inh'/>
+						</Row>
+					</Section>
+					<Section N='Geometry' IX='0'>
+						<Row T='MoveTo' IX='1'>
+							<Cell N='X' V='-0.105491412788675'/>
+							<Cell N='Y' V='0'/>
+						</Row>
+						<Row T='LineTo' IX='2'>
+							<Cell N='X' V='-0.2031924148264164'/>
+							<Cell N='Y' V='0'/>
+						</Row>
+						<Row T='LineTo' IX='3'>
+							<Cell N='X' V='-0.2031924148264164'/>
+							<Cell N='Y' V='-3.105257715740629'/>
+						</Row>
+						<Row T='LineTo' IX='4'>
+							<Cell N='X' V='-0.144508587211325'/>
+							<Cell N='Y' V='-3.105257715740629'/>
+						</Row>
+					</Section>
+				</Shape>
+				<Shape ID='19' NameU='Reducer' Name='Reducer' Type='Shape' Master='7'>
+					<Cell N='PinX' V='0.06726276946339162' F='Sheet.15!Width*0.052054714666507'/>
+					<Cell N='PinY' V='0.02892378555823894' F='Sheet.15!Height*0.0090612537987797'/>
+					<Cell N='Width' V='0.05784757111647788' F='Sheet.15!Width*0.044768284634156'/>
+					<Cell N='Height' V='0.05784757111647788' F='Sheet.15!Height*0.018122507597559'/>
+					<Cell N='LocPinX' V='0.02892378555823894' F='Inh'/>
+					<Cell N='LocPinY' V='0.02892378555823894' F='Inh'/>
+					<Cell N='LayerMember' V='3'/>
+					<Cell N='ObjType' V='1'/>
+					<Cell N='TxtPinX' V='0.02892378555823894' F='Inh'/>
+					<Cell N='TxtPinY' V='-0.129453168611782' F='Inh'/>
+					<Section N='Control'>
+						<Row N='Row_1'>
+							<Cell N='X' V='0.02892378555823894' F='Inh'/>
+							<Cell N='Y' V='-0.129453168611782' F='Inh'/>
+							<Cell N='XDyn' V='0.02892378555823894' F='Inh'/>
+							<Cell N='YDyn' V='0.02892378555823894' F='Inh'/>
+						</Row>
+					</Section>
+					<Section N='Connection'>
+						<Row T='Connection' IX='0'>
+							<Cell N='X' V='0.02892378555823894' F='Inh'/>
+							<Cell N='Y' V='0.02892378555823894' F='Inh'/>
+						</Row>
+						<Row T='Connection' IX='1'>
+							<Cell N='X' V='0.05784757111647788' F='Inh'/>
+							<Cell N='Y' V='0.02892378555823894' F='Inh'/>
+						</Row>
+						<Row T='Connection' IX='2'>
+							<Cell N='X' V='0' F='Inh'/>
+							<Cell N='Y' V='0.02892378555823894' F='Inh'/>
+						</Row>
+					</Section>
+					<Section N='Geometry' IX='0'>
+						<Row T='MoveTo' IX='1'>
+							<Cell N='X' V='0' F='Inh'/>
+							<Cell N='Y' V='0.05784757111647788' F='Inh'/>
+						</Row>
+						<Row T='LineTo' IX='2'>
+							<Cell N='X' V='0.05784757111647788' F='Inh'/>
+							<Cell N='Y' V='0.04338567833735841' F='Inh'/>
+						</Row>
+						<Row T='LineTo' IX='3'>
+							<Cell N='X' V='0.05784757111647788' F='Inh'/>
+							<Cell N='Y' V='0.01446189277911947' F='Inh'/>
+						</Row>
+						<Row T='LineTo' IX='4'>
+							<Cell N='X' V='0' F='Inh'/>
+							<Cell N='Y' V='0' F='Inh'/>
+						</Row>
+						<Row T='LineTo' IX='5'>
+							<Cell N='X' V='0' F='Inh'/>
+							<Cell N='Y' V='0.05784757111647788' F='Inh'/>
+						</Row>
+					</Section>
+				</Shape>
+				<Shape ID='20' NameU='Major Pipeline.12' Name='Major Pipeline.12' Type='Shape' Master='6'>
+					<Cell N='PinX' V='0.6941708700431747' F='Inh'/>
+					<Cell N='PinY' V='0.1405696094648494' F='Inh'/>
+					<Cell N='Width' V='1.195968630043088' F='GUARD(EndX-BeginX)'/>
+					<Cell N='Height' V='0.25' F='GUARD(0.25DL)'/>
+					<Cell N='LocPinX' V='0.5979843150215439' F='Inh'/>
+					<Cell N='LocPinY' V='0.125' F='Inh'/>
+					<Cell N='BeginX' V='0.09618655502163076' F='PAR(PNT(Sheet.19!Connections.X2,Sheet.19!Connections.Y2))'/>
+					<Cell N='BeginY' V='0.02892378555823894' F='PAR(PNT(Sheet.19!Connections.X2,Sheet.19!Connections.Y2))'/>
+					<Cell N='EndX' V='1.292155185064719' F='Sheet.15!Width*1'/>
+					<Cell N='EndY' V='0.2522154333714598' F='Sheet.15!Height*0.079014140425925'/>
+					<Cell N='LayerMember' V='3'/>
+					<Cell N='BegTrigger' V='2' F='_XFTRIGGER(Sheet.19!EventXFMod)'/>
+					<Cell N='TxtPinX' V='1.595968630043088' U='PT' F='Inh'/>
+					<Cell N='TxtPinY' V='0.1400208427600559' F='Inh'/>
+					<Section N='Control'>
+						<Row N='Row_1'>
+							<Cell N='X' V='1.595968630043088' U='PT' F='Inh'/>
+							<Cell N='Y' V='0.1400208427600559' F='Inh'/>
+							<Cell N='XDyn' V='1.595968630043088' U='PT' F='Inh'/>
+							<Cell N='YDyn' V='0.1400208427600559' F='Inh'/>
+							<Cell N='XCon' V='9' F='Inh'/>
+							<Cell N='YCon' V='4' F='Inh'/>
+						</Row>
+					</Section>
+					<Section N='Geometry' IX='0'>
+						<Row T='MoveTo' IX='1'>
+							<Cell N='X' V='0'/>
+							<Cell N='Y' V='0.01335417609338918'/>
+						</Row>
+						<Row T='LineTo' IX='2'>
+							<Cell N='X' V='1.195968630043088'/>
+							<Cell N='Y' V='0.01335417609338918'/>
+						</Row>
+						<Row T='LineTo' IX='3'>
+							<Cell N='X' V='1.195968630043088'/>
+							<Cell N='Y' V='0.2366458239066108'/>
+						</Row>
+					</Section>
+				</Shape>
+			</Shapes>
+		</Shape>
+	</Shapes>
+	<Connects>
+		<Connect FromSheet='12' FromCell='BeginX' FromPart='9' ToSheet='11' ToCell='Connections.X2' ToPart='101'/>
+		<Connect FromSheet='10' FromCell='EndX' FromPart='12' ToSheet='11' ToCell='Connections.X3' ToPart='102'/>
+		<Connect FromSheet='10' FromCell='BeginX' FromPart='9' ToSheet='6' ToCell='Connections.X3' ToPart='102'/>
+		<Connect FromSheet='8' FromCell='BeginX' FromPart='9' ToSheet='6' ToCell='Connections.X2' ToPart='101'/>
+		<Connect FromSheet='20' FromCell='BeginX' FromPart='9' ToSheet='19' ToCell='Connections.X2' ToPart='101'/>
+		<Connect FromSheet='18' FromCell='EndX' FromPart='12' ToSheet='19' ToCell='Connections.X3' ToPart='102'/>
+		<Connect FromSheet='18' FromCell='BeginX' FromPart='9' ToSheet='16' ToCell='Connections.X3' ToPart='102'/>
+		<Connect FromSheet='17' FromCell='BeginX' FromPart='9' ToSheet='16' ToCell='Connections.X2' ToPart='101'/>
+	</Connects>
+</PageContents>
