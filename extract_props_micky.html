@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VSDX ke SVG Converter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+
+      .container {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 2.5em;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .upload-area {
+        border: 3px dashed #667eea;
+        border-radius: 12px;
+        padding: 50px 20px;
+        text-align: center;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: linear-gradient(135deg, #f5f7ff 0%, #e8ecff 100%);
+      }
+
+      .upload-area:hover {
+        border-color: #764ba2;
+        background: linear-gradient(135deg, #e8ecff 0%, #d4ddff 100%);
+        transform: translateY(-2px);
+      }
+
+      .upload-area.dragover {
+        border-color: #28a745;
+        background: linear-gradient(135deg, #f0fff4 0%, #d4edda 100%);
+      }
+
+      input[type="file"] {
+        display: none;
+      }
+
+      .upload-text {
+        font-size: 1.2em;
+        color: #666;
+        margin-top: 10px;
+      }
+
+      .upload-icon {
+        font-size: 3em;
+        color: #667eea;
+        margin-bottom: 10px;
+      }
+
+      button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1.1em;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin: 10px 0;
+      }
+
+      button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .status {
+        margin: 20px 0;
+        padding: 15px;
+        border-radius: 8px;
+        font-weight: bold;
+      }
+
+      .status.info {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        color: #1565c0;
+        border-left: 4px solid #2196f3;
+      }
+
+      .status.success {
+        background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+        color: #2e7d32;
+        border-left: 4px solid #4caf50;
+      }
+
+      .status.error {
+        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+        color: #c62828;
+        border-left: 4px solid #f44336;
+      }
+
+      .output-area {
+        margin-top: 30px;
+      }
+
+      .output-content {
+        background: #1e1e1e;
+        color: #f8f8f2;
+        padding: 20px;
+        border-radius: 8px;
+        font-family: "Consolas", "Monaco", monospace;
+        max-height: 500px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+
+      .file-info {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+        border: 1px solid #dee2e6;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 6px;
+        background: #e0e0e0;
+        border-radius: 3px;
+        overflow: hidden;
+        margin: 15px 0;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        border-radius: 3px;
+        transition: width 0.3s ease;
+        width: 0%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎨 VSDX ke SVG Converter</h1>
+
+      <div
+        class="upload-area"
+        onclick="document.getElementById('fileInput').click()"
+      >
+        <div class="upload-icon">📁</div>
+        <div><strong>Klik untuk memilih file VSDX</strong></div>
+        <div class="upload-text">atau drag & drop file VSDX di sini</div>
+      </div>
+
+      <input type="file" id="fileInput" accept=".vsdx" />
+
+      <button id="convertBtn" onclick="convertFile()" disabled>
+        🔄 Convert ke SVG
+      </button>
+
+      <div class="progress-bar" id="progressBar" style="display: none">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <div id="status"></div>
+
+      <div class="output-area" id="outputArea" style="display: none">
+        <h3>📄 Output SVG:</h3>
+        <button onclick="downloadSVG()">💾 Download SVG</button>
+        <div class="output-content" id="outputContent"></div>
+      </div>
+    </div>
+
+    <script>
+      let selectedFile = null;
+      let generatedSVG = "";
+
+      // Setup drag and drop
+      const uploadArea = document.querySelector(".upload-area");
+      const fileInput = document.getElementById("fileInput");
+
+      ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+        uploadArea.addEventListener(eventName, preventDefaults, false);
+      });
+
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      ["dragenter", "dragover"].forEach((eventName) => {
+        uploadArea.addEventListener(eventName, highlight, false);
+      });
+
+      ["dragleave", "drop"].forEach((eventName) => {
+        uploadArea.addEventListener(eventName, unhighlight, false);
+      });
+
+      function highlight() {
+        uploadArea.classList.add("dragover");
+      }
+
+      function unhighlight() {
+        uploadArea.classList.remove("dragover");
+      }
+
+      uploadArea.addEventListener("drop", handleDrop, false);
+
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        handleFiles(files);
+      }
+
+      fileInput.addEventListener("change", function (e) {
+        handleFiles(e.target.files);
+      });
+
+      function handleFiles(files) {
+        if (files.length > 0) {
+          const file = files[0];
+          if (file.name.toLowerCase().endsWith(".vsdx")) {
+            selectedFile = file;
+            document.getElementById("convertBtn").disabled = false;
+            showStatus(
+              `File dipilih: ${file.name} (${formatFileSize(file.size)})`,
+              "info"
+            );
+          } else {
+            showStatus("Harap pilih file dengan ekstensi .vsdx", "error");
+          }
+        }
+      }
+
+      function formatFileSize(bytes) {
+        if (bytes === 0) return "0 Bytes";
+        const k = 1024;
+        const sizes = ["Bytes", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+      }
+
+      function showStatus(message, type) {
+        const status = document.getElementById("status");
+        status.className = `status ${type}`;
+        status.textContent = message;
+        status.style.display = "block";
+      }
+
+      function updateProgress(percent) {
+        const progressBar = document.getElementById("progressBar");
+        const progressFill = document.getElementById("progressFill");
+
+        if (percent === 0) {
+          progressBar.style.display = "none";
+        } else {
+          progressBar.style.display = "block";
+          progressFill.style.width = percent + "%";
+        }
+      }
+
+      async function convertFile() {
+        if (!selectedFile) return;
+
+        try {
+          updateProgress(10);
+          showStatus("Membaca file VSDX...", "info");
+
+          const zip = new JSZip();
+          const zipContent = await zip.loadAsync(selectedFile);
+
+          updateProgress(30);
+          showStatus("Mengekstrak file XML...", "info");
+
+          // Read necessary files
+          const page1XML = await readXMLFile(
+            zipContent,
+            "visio/pages/page1.xml"
+          );
+          const mastersXML = await readXMLFile(
+            zipContent,
+            "visio/masters/masters.xml"
+          );
+
+          updateProgress(50);
+          showStatus("Memproses informasi master...", "info");
+
+          // Process master information
+          const masterInfo = await processMasterInfo(zipContent, mastersXML);
+
+          updateProgress(70);
+          showStatus("Mengkonversi ke SVG...", "info");
+
+          // Convert to SVG
+          const svgContent = await convertToSVG(page1XML, masterInfo);
+
+          updateProgress(90);
+          showStatus("Menampilkan hasil...", "info");
+
+          // Display result
+          generatedSVG = svgContent;
+          document.getElementById("outputContent").textContent = svgContent;
+          document.getElementById("outputArea").style.display = "block";
+
+          updateProgress(100);
+          showStatus("Konversi berhasil! ✅", "success");
+
+          setTimeout(() => updateProgress(0), 2000);
+        } catch (error) {
+          showStatus(`Error: ${error.message}`, "error");
+          updateProgress(0);
+          console.error("Conversion error:", error);
+        }
+      }
+
+      async function readXMLFile(zipContent, path) {
+        const file = zipContent.files[path];
+        if (!file) {
+          throw new Error(`File ${path} tidak ditemukan dalam VSDX`);
+        }
+        const content = await file.async("string");
+        return new DOMParser().parseFromString(content, "text/xml");
+      }
+
+      async function processMasterInfo(zipContent, mastersXML) {
+        const masterInfo = {};
+
+        // Get all master elements
+        const masters = mastersXML.querySelectorAll("Master");
+
+        for (const master of masters) {
+          const masterId = master.getAttribute("ID");
+          const rId = master.getAttribute("Rel");
+
+          if (masterId && rId) {
+            // Extract number from rId (e.g., "rId1" -> "1")
+            const rIdNumber = rId.replace("rId", "");
+            const masterPath = `visio/masters/master${rIdNumber}.xml`;
+
+            try {
+              const masterXML = await readXMLFile(zipContent, masterPath);
+              masterInfo[masterId] = extractMasterProperties(masterXML);
+            } catch (error) {
+              console.warn(
+                `Could not read master file ${masterPath}:`,
+                error.message
+              );
+              masterInfo[masterId] = { name: "Unknown", properties: [] };
+            }
+          }
+        }
+
+        return masterInfo;
+      }
+
+      function extractMasterProperties(masterXML) {
+        const result = {
+          name: "Unknown",
+          properties: [],
+        };
+
+        // Try to extract master name from various possible locations
+        const nameElement =
+          masterXML.querySelector("Master") ||
+          masterXML.querySelector("PageSheet") ||
+          masterXML.querySelector("Shape");
+
+        if (nameElement) {
+          result.name =
+            nameElement.getAttribute("NameU") ||
+            nameElement.getAttribute("Name") ||
+            nameElement.getAttribute("ID") ||
+            "Unknown";
+        }
+
+        // Extract custom properties
+        const custProps = masterXML.querySelectorAll('Cell[N^="Prop."]');
+        custProps.forEach((prop) => {
+          const propName = prop.getAttribute("N");
+          const propValue = prop.getAttribute("V");
+          if (propName && propValue) {
+            result.properties.push({
+              name: propName.replace("Prop.", ""),
+              value: propValue,
+            });
+          }
+        });
+
+        return result;
+      }
+
+      function convertToSVG(page1XML, masterInfo) {
+        const shapes = page1XML.querySelectorAll("Shape");
+        let svgContent = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:v="urn:schemas-microsoft-com:vml" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="0 0 800 600" 
+     width="800" 
+     height="600">
+`;
+
+        shapes.forEach((shape, index) => {
+          const shapeId = shape.getAttribute("ID") || `shape${index}`;
+          const masterId =
+            shape.getAttribute("Master") || shape.getAttribute("MasterShape");
+
+          // Get shape position and other attributes
+          const x =
+            parseFloat(
+              shape.querySelector('Cell[N="PinX"]')?.getAttribute("V") || "0"
+            ) * 10;
+          const y =
+            parseFloat(
+              shape.querySelector('Cell[N="PinY"]')?.getAttribute("V") || "0"
+            ) * 10;
+
+          // Create shape group
+          svgContent += `\n  <g id="shape${shapeId}-${index}" v:mID="${shapeId}" v:groupContext="shape" v:layerMember="0" transform="translate(${x},-${y})">`;
+
+          // Add title and description
+          const masterData = masterInfo[masterId] || {
+            name: "Unknown Shape",
+            properties: [],
+          };
+          svgContent += `\n    <title>${masterData.name}.${shapeId}</title>`;
+
+          // Try to get shape text or use master name
+          const shapeText =
+            shape.querySelector("Text")?.textContent?.trim() ||
+            shape.querySelector('Cell[N="Char.Text"]')?.getAttribute("V") ||
+            masterData.name;
+          svgContent += `\n    <desc>${shapeText}</desc>`;
+
+          // Add custom properties
+          svgContent += `\n    <v:custProps>`;
+
+          // Add common property definitions
+          const commonProps = [
+            { name: "Description", label: "Description", type: "0" },
+            { name: "LineSize", label: "Line Size", type: "0" },
+            { name: "Schedule", label: "Schedule", type: "0" },
+            { name: "Material", label: "Material", type: "0" },
+            { name: "DesignPressure", label: "Design Pressure", type: "0" },
+            {
+              name: "DesignTemperature",
+              label: "Design Temperature",
+              type: "0",
+            },
+          ];
+
+          commonProps.forEach((prop, i) => {
+            svgContent += `\n      <v:cp v:nameU="${prop.name}" v:lbl="${prop.label}" v:type="${prop.type}" v:sortKey="${i}" v:langID="1033"/>`;
+          });
+
+          // Add master properties with values
+          masterData.properties.forEach((prop, i) => {
+            svgContent += `\n      <v:cp v:nameU="${prop.name}" v:lbl="" v:prompt="" v:type="0" v:format="" v:sortKey="" v:invis="false" v:ask="false" v:langID="0" v:cal="0" v:val="${prop.value}"/>`;
+          });
+
+          // Add some sample values based on shape
+          svgContent += `\n      <v:cp v:nameU="Description" v:lbl="" v:prompt="" v:type="0" v:format="" v:sortKey="" v:invis="false" v:ask="false" v:langID="0" v:cal="0" v:val="VT4(${shapeText})"/>`;
+
+          if (
+            masterData.name.toLowerCase().includes("pipeline") ||
+            masterData.name.toLowerCase().includes("pipe")
+          ) {
+            svgContent += `\n      <v:cp v:nameU="LineSize" v:lbl="" v:prompt="" v:type="0" v:format="" v:sortKey="" v:invis="false" v:ask="false" v:langID="0" v:cal="0" v:val="VT4(8&#34;)"/>`;
+          }
+
+          svgContent += `\n    </v:custProps>`;
+
+          // Add basic shape representation (rectangle for now)
+          const width =
+            parseFloat(
+              shape.querySelector('Cell[N="Width"]')?.getAttribute("V") || "50"
+            ) * 10;
+          const height =
+            parseFloat(
+              shape.querySelector('Cell[N="Height"]')?.getAttribute("V") || "20"
+            ) * 10;
+
+          svgContent += `\n    <rect x="0" y="0" width="${width}" height="${height}" fill="#E6F3FF" stroke="#4A90E2" stroke-width="2"/>`;
+          if (shapeText) {
+            svgContent += `\n    <text x="${width / 2}" y="${
+              height / 2
+            }" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="12">${shapeText}</text>`;
+          }
+
+          svgContent += `\n  </g>`;
+        });
+
+        svgContent += `\n</svg>`;
+        return svgContent;
+      }
+
+      function downloadSVG() {
+        if (!generatedSVG) return;
+
+        const blob = new Blob([generatedSVG], { type: "image/svg+xml" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "converted.svg";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    </script>
+  </body>
+</html>
