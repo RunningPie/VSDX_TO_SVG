@@ -11,8 +11,10 @@ Converting Visio diagrams to SVG involves parsing complex XML structures, handli
 Different conversion approaches are implemented in separate branches of this repository:
 
 **Dama Branch:** [`dama`](https://github.com/RunningPie/VSDX_TO_SVG/tree/dama)
-**Faris Branch:** [`dama`](https://github.com/RunningPie/VSDX_TO_SVG/tree/faris)
-**Micky Branch:** [`dama`](https://github.com/RunningPie/VSDX_TO_SVG/tree/Micky)
+
+**Faris Branch:** [`faris`](https://github.com/RunningPie/VSDX_TO_SVG/tree/faris)
+
+**Micky Branch:** [`micky`](https://github.com/RunningPie/VSDX_TO_SVG/tree/Micky)
 
 ## Repository Structure
 
