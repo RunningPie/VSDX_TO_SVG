@@ -30,6 +30,12 @@ class VsdxToSvgConverter:
         self.colors = {}
         self.css_classes = {}
         self.class_counter = 1
+
+        # Theme-related data structures
+        self.theme_properties = {}  # Dynamic theme style sheet properties
+        self.theme_colors = {}      # Theme color scheme
+        self.theme_fonts = {}       # Theme font scheme
+        self.theme_effects = {}     # Theme effect scheme
         
         # Zip file reference
         self.zf = None
@@ -85,12 +91,12 @@ class VsdxToSvgConverter:
                     'properties': {}
                 }
                 
-                # Parse ALL style properties
+                # Parse ALL style properties, evaluating themed values
                 for cell_elem in style_elem.findall('v:Cell', self.namespaces):
                     cell_name = cell_elem.get('N')
-                    cell_value = cell_elem.get('V', '0')
+                    cell_value = self._evaluate_themed_cell(cell_elem)
                     style_data['properties'][cell_name] = cell_value
-                
+
                 self.styles[style_id] = style_data
                 print(f"  - Parsed Style {style_id}: {name}")
 
@@ -134,28 +140,239 @@ class VsdxToSvgConverter:
         properties = {}
         for cell_elem in page_sheet_elem.findall('v:Cell', self.namespaces):
             cell_name = cell_elem.get('N')
-            cell_value = cell_elem.get('V', '0')
+            cell_value = self._evaluate_themed_cell(cell_elem)
             properties[cell_name] = cell_value
         return properties
+
+    def _parse_themed_values(self, zf):
+        """Parse dynamic theme style sheet and theme components."""
+        print("Parsing theme components...")
+
+        document_tree = self._get_xml_tree(zf, 'visio/document.xml')
+        if not document_tree:
+            return
+
+        # Find dynamic theme style sheet (NameU="Theme")
+        for style_elem in document_tree.findall('.//v:StyleSheet', self.namespaces):
+            name_u = style_elem.get('NameU', '')
+            if name_u == 'Theme':
+                theme_id = style_elem.get('ID')
+                print(f"  - Found dynamic theme style sheet: {theme_id}")
+
+                # Parse theme properties
+                theme_properties = {}
+                for cell_elem in style_elem.findall('v:Cell', self.namespaces):
+                    cell_name = cell_elem.get('N')
+                    cell_value = cell_elem.get('V', '0')
+                    theme_properties[cell_name] = cell_value
+
+                self.theme_properties = theme_properties
+                break
+
+        # Look for theme XML part if it exists
+        try:
+            theme_tree = self._get_xml_tree(zf, 'visio/theme/theme1.xml')
+            if theme_tree:
+                self._parse_theme_xml(theme_tree)
+        except:
+            pass  # Theme XML part might not exist
+
+    def _parse_theme_xml(self, theme_tree):
+        """Parse theme XML part for additional theme information."""
+        print("  - Parsing theme XML part")
+
+        # Parse Office theme components if present
+        # This handles the ISO/IEC29500 theme format
+        root = theme_tree.getroot()
+
+        # Look for themeElements (Office theme format)
+        theme_elements = root.find('.//{http://schemas.openxmlformats.org/drawingml/2006/main}themeElements')
+        if theme_elements is not None:
+            # Parse color scheme
+            clr_scheme = theme_elements.find('.//{http://schemas.openxmlformats.org/drawingml/2006/main}clrScheme')
+            if clr_scheme is not None:
+                self._parse_color_scheme(clr_scheme)
+
+            # Parse font scheme
+            font_scheme = theme_elements.find('.//{http://schemas.openxmlformats.org/drawingml/2006/main}fontScheme')
+            if font_scheme is not None:
+                self._parse_font_scheme(font_scheme)
+
+            # Parse effect scheme
+            fmt_scheme = theme_elements.find('.//{http://schemas.openxmlformats.org/drawingml/2006/main}fmtScheme')
+            if fmt_scheme is not None:
+                self._parse_effect_scheme(fmt_scheme)
+
+    def _parse_color_scheme(self, clr_scheme):
+        """Parse Office theme color scheme."""
+        # Parse the 12 standard theme colors + accent colors
+        color_mapping = {
+            'dk1': 'lt1', 'dk2': 'lt2', 'lt1': 'dk1', 'lt2': 'dk2',
+            'accent1': 'accent1', 'accent2': 'accent2', 'accent3': 'accent3',
+            'accent4': 'accent4', 'accent5': 'accent5', 'accent6': 'accent6',
+            'hlink': 'hlink', 'folHlink': 'folHlink'
+        }
+
+        for color_elem in clr_scheme:
+            color_name = color_elem.tag.split('}')[-1]  # Remove namespace
+            if color_name in color_mapping:
+                # Extract color value (this is simplified - real implementation would parse RGB values)
+                self.theme_colors[color_mapping[color_name]] = self._extract_color_value(color_elem)
+
+    def _parse_font_scheme(self, font_scheme):
+        """Parse Office theme font scheme."""
+        # Parse major and minor font sets
+        major_font = font_scheme.find('.//{http://schemas.openxmlformats.org/drawingml/2006/main}majorFont')
+        minor_font = font_scheme.find('.//{http://schemas.openxmlformats.org/drawingml/2006/main}minorFont')
+
+        if major_font is not None:
+            self.theme_fonts['major'] = self._extract_font_info(major_font)
+        if minor_font is not None:
+            self.theme_fonts['minor'] = self._extract_font_info(minor_font)
+
+    def _parse_effect_scheme(self, fmt_scheme):
+        """Parse Office theme effect scheme."""
+        # Parse fill style list, line style list, and effect style list
+        fill_style_lst = fmt_scheme.find('.//{http://schemas.openxmlformats.org/drawingml/2006/main}fillStyleLst')
+        ln_style_lst = fmt_scheme.find('.//{http://schemas.openxmlformats.org/drawingml/2006/main}lnStyleLst')
+        effect_style_lst = fmt_scheme.find('.//{http://schemas.openxmlformats.org/drawingml/2006/main}effectStyleLst')
+
+        if fill_style_lst is not None:
+            self.theme_effects['fills'] = [self._extract_fill_info(fill) for fill in fill_style_lst]
+        if ln_style_lst is not None:
+            self.theme_effects['lines'] = [self._extract_line_info(line) for line in ln_style_lst]
+        if effect_style_lst is not None:
+            self.theme_effects['effects'] = [self._extract_effect_info(effect) for effect in effect_style_lst]
+
+    def _extract_color_value(self, color_elem):
+        """Extract color value from theme color element."""
+        # This is a simplified implementation
+        # Real implementation would parse srgbClr, sysClr, etc.
+        for child in color_elem:
+            if 'srgbClr' in child.tag:
+                val = child.get('val')
+                if val:
+                    return f"#{val}"
+            elif 'sysClr' in child.tag:
+                val = child.get('val')
+                if val:
+                    return val
+        return '#000000'
+
+    def _extract_font_info(self, font_elem):
+        """Extract font information from theme font element."""
+        fonts = {}
+        for child in font_elem:
+            tag_name = child.tag.split('}')[-1]
+            if tag_name in ['latin', 'ea', 'cs']:
+                typeface = child.get('typeface')
+                if typeface:
+                    fonts[tag_name] = typeface
+        return fonts
+
+    def _extract_fill_info(self, fill_elem):
+        """Extract fill information from theme fill element."""
+        # Simplified implementation
+        return {'type': fill_elem.tag.split('}')[-1]}
+
+    def _extract_line_info(self, line_elem):
+        """Extract line information from theme line element."""
+        # Simplified implementation
+        return {'type': line_elem.tag.split('}')[-1]}
+
+    def _extract_effect_info(self, effect_elem):
+        """Extract effect information from theme effect element."""
+        # Simplified implementation
+        return {'type': effect_elem.tag.split('}')[-1]}
+
+    def _evaluate_themed_cell(self, cell_elem):
+        """Evaluate a cell that has themed values."""
+        v_value = cell_elem.get('V', '')
+        f_value = cell_elem.get('F', '')
+        cell_name = cell_elem.get('N', '')
+
+        # If V="Themed", get value from theme
+        if v_value.lower() == 'themed':
+            # Look up in theme properties
+            if cell_name in self.theme_properties:
+                theme_val = self.theme_properties[cell_name]
+                if theme_val != 'Themed':  # If theme has a real value
+                    return theme_val
+            # Fallback to inheritance
+            elif f_value == 'Inh':
+                return self._resolve_inherited_value(cell_elem)
+            elif f_value.startswith('THEMEVAL'):
+                return self._evaluate_themeval_function(f_value, cell_name)
+            else:
+                # Direct fallback to default
+                return self._get_default_value_for_property(cell_name)
+
+        # If F="Inh", resolve inheritance
+        elif f_value == 'Inh':
+            return self._resolve_inherited_value(cell_elem)
+
+        # If F="THEMEVAL()", evaluate theme function
+        elif f_value.startswith('THEMEVAL'):
+            return self._evaluate_themeval_function(f_value, cell_name)
+
+        # Default: return the V value
+        return v_value
+
+    def _evaluate_themeval_function(self, formula, cell_name):
+        """Evaluate THEMEVAL() function calls."""
+        if formula == 'THEMEVAL()':
+            # Get value directly from theme without inheritance
+            if cell_name in self.theme_properties:
+                return self.theme_properties[cell_name]
+            # Check theme color/font/effect schemes
+            elif cell_name in self.theme_colors:
+                return self.theme_colors[cell_name]
+            elif cell_name in self.theme_fonts:
+                return self.theme_fonts[cell_name]
+        elif formula.startswith('THEMEVAL('):
+            # Parse arguments and get from specific theme
+            # This is more complex and would require parsing the argument
+            pass
+
+        return '0'  # Default fallback
+
+    def _resolve_inherited_value(self, cell_elem):
+        """Resolve inherited value for a cell with F='Inh'."""
+        cell_name = cell_elem.get('N')
+
+        # Try to find the value in the inheritance chain
+        # This is a simplified implementation
+        # Real implementation would walk the full inheritance hierarchy
+
+        # Check if this cell exists in any parent style
+        for style_data in self.styles.values():
+            if cell_name in style_data.get('properties', {}):
+                return style_data['properties'][cell_name]
+
+        return '0'  # Default fallback
 
     def _resolve_style_inheritance(self, style_id):
         """Resolve style inheritance chain and return combined properties."""
         if not style_id or style_id not in self.styles:
             return {}
-        
+
         combined_properties = {}
         current_style_id = style_id
-        
+
         # Walk up the inheritance chain (typically: specific style -> root style "0")
         while current_style_id:
             if current_style_id in self.styles:
                 current_style = self.styles[current_style_id]
-                
+
                 # Add properties from current style (child overrides parent)
                 for prop_name, prop_value in current_style['properties'].items():
                     if prop_name not in combined_properties:  # Don't override if already set
-                        combined_properties[prop_name] = prop_value
-                
+                        # Evaluate themed values in the property
+                        if isinstance(prop_value, str) and prop_value.lower() == 'themed':
+                            combined_properties[prop_name] = self._evaluate_theme_property(prop_name)
+                        else:
+                            combined_properties[prop_name] = prop_value
+
                 # Check if this style inherits from another
                 if 'Style' in current_style['properties']:
                     parent_style_id = current_style['properties']['Style']
@@ -167,8 +384,49 @@ class VsdxToSvgConverter:
                     break
             else:
                 break
-        
+
         return combined_properties
+
+    def _evaluate_theme_property(self, prop_name):
+        """Evaluate a theme property by name."""
+        # First check theme properties
+        if prop_name in self.theme_properties:
+            theme_value = self.theme_properties[prop_name]
+            # If the theme value is still "Themed", we need to look deeper
+            if isinstance(theme_value, str) and theme_value.lower() == 'themed':
+                # This is a fallback - in a real implementation, we'd need to
+                # handle more complex theme inheritance
+                return self._get_default_value_for_property(prop_name)
+            return theme_value
+
+        # Check theme colors
+        if prop_name in self.theme_colors:
+            return self.theme_colors[prop_name]
+
+        # Check theme fonts
+        if prop_name in self.theme_fonts:
+            return self.theme_fonts[prop_name]
+
+        # Return default value for the property
+        return self._get_default_value_for_property(prop_name)
+
+    def _get_default_value_for_property(self, prop_name):
+        """Get a default value for a property when theme evaluation fails."""
+        defaults = {
+            'LineWeight': '0.01',
+            'LineColor': '0',  # Usually maps to black
+            'FillForegnd': '1',  # Usually maps to white
+            'FillBkgnd': '0',  # Usually maps to black
+            'FillPattern': '1',
+            'LinePattern': '1',
+            'VerticalAlign': '1',  # Middle
+            'TextBkgnd': '0',
+            'LeftMargin': '0',
+            'RightMargin': '0',
+            'TopMargin': '0',
+            'BottomMargin': '0'
+        }
+        return defaults.get(prop_name, '0')
 
     def _get_shape_style_properties(self, shape_elem):
         """Get combined style properties for a shape considering inheritance."""
@@ -214,7 +472,6 @@ class VsdxToSvgConverter:
             'txt_pin_x': 0, 'txt_pin_y': 0,
             'txt_width': 0, 'txt_height': 0,
             'path': '',
-            'text': '',
             'style': {
                 'fill': '#ffffff',
                 'stroke': '#000000',
@@ -229,11 +486,11 @@ class VsdxToSvgConverter:
         # Parse all cells to get shape properties and override style properties
         for cell in shape_elem.findall('.//v:Cell', self.namespaces):
             prop_name = cell.get('N')
-            prop_value = cell.get('V', '0')
-            
+            prop_value = self._evaluate_themed_cell(cell)
+
             if not prop_name:
                 continue
-                
+
             shape_data['properties'][prop_name] = prop_value
             
             try:
@@ -279,39 +536,398 @@ class VsdxToSvgConverter:
                                                     shape_data['width'] / master['width'],
                                                     shape_data['height'] / master['height'])
 
-        # Parse text content - check multiple possible locations
-        text_content = ""
-        
-        # Check v:Text element
-        text_elem = shape_elem.find('.//v:Text', self.namespaces)
-        if text_elem is not None:
-            if text_elem.text:
-                text_content = text_elem.text.strip()
-            # Also check for text in child elements
-            for child in text_elem:
-                if child.text:
-                    text_content += child.text.strip() + " "
-        
-        # If no text found, check text in property values
-        if not text_content:
-            for prop_name, prop_value in shape_data['properties'].items():
-                if 'text' in prop_name.lower() and prop_value and prop_value not in ['0', '1']:
-                    text_content = prop_value
-                    break
-        
-        shape_data['text'] = text_content.strip()
+        # Parse rich text content with formatting
+        shape_data['text_runs'] = self._parse_text_runs(shape_elem)
+
+        # Parse text block properties
+        shape_data['text_block'] = self._parse_text_block_properties(shape_elem)
+
+        # Parse shape effects (shadows, bevels, etc.)
+        shape_data['effects'] = self._parse_shape_effects(shape_elem)
 
         return shape_data
+
+    def _parse_text_runs(self, shape_elem):
+        """Parse text runs from a shape element according to VSDX specification."""
+        text_runs = []
+
+        # Find Text element
+        text_elem = shape_elem.find('.//v:Text', self.namespaces)
+        if text_elem is None:
+            return text_runs
+
+        print(f"  - Processing text for shape: {shape_elem.get('ID')}")
+
+        # Parse text runs from the Text element
+        current_run = {
+            'text': '',
+            'char_props': {},
+            'para_props': {},
+            'tabs_props': {},
+            'field': None
+        }
+
+        # Process all child elements and text
+        for child in text_elem:
+            tag_name = child.tag.split('}')[-1] if '}' in child.tag else child.tag
+
+            if tag_name == 'cp':  # Character properties
+                if current_run['text']:  # Save previous run if it has text
+                    text_runs.append(current_run.copy())
+                    current_run['text'] = ''
+
+                # Parse character properties
+                current_run['char_props'] = self._parse_char_properties(child, shape_elem)
+
+            elif tag_name == 'pp':  # Paragraph properties
+                if current_run['text']:  # Save previous run if it has text
+                    text_runs.append(current_run.copy())
+                    current_run['text'] = ''
+
+                # Parse paragraph properties
+                current_run['para_props'] = self._parse_para_properties(child, shape_elem)
+
+            elif tag_name == 'tp':  # Tabs properties
+                if current_run['text']:  # Save previous run if it has text
+                    text_runs.append(current_run.copy())
+                    current_run['text'] = ''
+
+                # Parse tabs properties
+                current_run['tabs_props'] = self._parse_tabs_properties(child, shape_elem)
+
+            elif tag_name == 'fld':  # Text field
+                if current_run['text']:  # Save previous run if it has text
+                    text_runs.append(current_run.copy())
+                    current_run['text'] = ''
+
+                # Parse field
+                current_run['field'] = self._parse_text_field(child, shape_elem)
+
+            # Handle text content
+            if child.text:
+                current_run['text'] += child.text
+            if child.tail:
+                current_run['text'] += child.tail
+
+        # Handle text directly in Text element
+        if text_elem.text:
+            current_run['text'] += text_elem.text
+
+        # Add final run if it has text
+        if current_run['text'].strip():
+            text_runs.append(current_run)
+
+        if text_runs:
+            print(f"    - Found {len(text_runs)} text runs")
+
+        return text_runs
+
+    def _parse_char_properties(self, cp_elem, shape_elem):
+        """Parse character properties from cp element."""
+        props = {}
+        ix = cp_elem.get('IX')  # Index of character properties row
+
+        if ix:
+            # Find character section and get the specified row
+            char_section = shape_elem.find('.//v:Section[@N="Character"]', self.namespaces)
+            if char_section is not None:
+                # Find the row with matching IX
+                for row in char_section.findall('v:Row', self.namespaces):
+                    if row.get('IX') == ix:
+                        # Parse all cells in this row
+                        for cell in row.findall('v:Cell', self.namespaces):
+                            cell_name = cell.get('N')
+                            cell_value = self._evaluate_themed_cell(cell)
+                            props[cell_name] = cell_value
+                        break
+
+        return props
+
+    def _parse_para_properties(self, pp_elem, shape_elem):
+        """Parse paragraph properties from pp element."""
+        props = {}
+        ix = pp_elem.get('IX')  # Index of paragraph properties row
+
+        if ix:
+            # Find paragraph section and get the specified row
+            para_section = shape_elem.find('.//v:Section[@N="Paragraph"]', self.namespaces)
+            if para_section is not None:
+                # Find the row with matching IX
+                for row in para_section.findall('v:Row', self.namespaces):
+                    if row.get('IX') == ix:
+                        # Parse all cells in this row
+                        for cell in row.findall('v:Cell', self.namespaces):
+                            cell_name = cell.get('N')
+                            cell_value = self._evaluate_themed_cell(cell)
+                            props[cell_name] = cell_value
+                        break
+
+        return props
+
+    def _parse_tabs_properties(self, tp_elem, shape_elem):
+        """Parse tabs properties from tp element."""
+        props = {}
+        ix = tp_elem.get('IX')  # Index of tabs properties row
+
+        if ix:
+            # Find tabs section and get the specified row
+            tabs_section = shape_elem.find('.//v:Section[@N="Tabs"]', self.namespaces)
+            if tabs_section is not None:
+                # Find the row with matching IX
+                for row in tabs_section.findall('v:Row', self.namespaces):
+                    if row.get('IX') == ix:
+                        # Parse all cells in this row
+                        for cell in row.findall('v:Cell', self.namespaces):
+                            cell_name = cell.get('N')
+                            cell_value = self._evaluate_themed_cell(cell)
+                            props[cell_name] = cell_value
+                        break
+
+        return props
+
+    def _parse_text_field(self, fld_elem, shape_elem):
+        """Parse text field from fld element."""
+        field = {}
+        ix = fld_elem.get('IX')  # Index of field row
+
+        if ix:
+            # Find field section and get the specified row
+            field_section = shape_elem.find('.//v:Section[@N="Field"]', self.namespaces)
+            if field_section is not None:
+                # Find the row with matching IX
+                for row in field_section.findall('v:Row', self.namespaces):
+                    if row.get('IX') == ix:
+                        # Parse all cells in this row
+                        for cell in row.findall('v:Cell', self.namespaces):
+                            cell_name = cell.get('N')
+                            cell_value = self._evaluate_themed_cell(cell)
+                            field[cell_name] = cell_value
+                        break
+
+        return field
+
+    def _parse_text_block_properties(self, shape_elem):
+        """Parse text block properties from shape element."""
+        text_block_props = {
+            'left_margin': 0,
+            'right_margin': 0,
+            'top_margin': 0,
+            'bottom_margin': 0,
+            'vertical_align': '1',  # Middle
+            'text_bkgnd': '0',
+            'text_direction': '0'  # Left to right
+        }
+
+        # Find text block cells in the shape
+        text_block_cells = shape_elem.findall('.//v:Cell[@N="LeftMargin"]', self.namespaces)
+        text_block_cells.extend(shape_elem.findall('.//v:Cell[@N="RightMargin"]', self.namespaces))
+        text_block_cells.extend(shape_elem.findall('.//v:Cell[@N="TopMargin"]', self.namespaces))
+        text_block_cells.extend(shape_elem.findall('.//v:Cell[@N="BottomMargin"]', self.namespaces))
+        text_block_cells.extend(shape_elem.findall('.//v:Cell[@N="VerticalAlign"]', self.namespaces))
+        text_block_cells.extend(shape_elem.findall('.//v:Cell[@N="TextBkgnd"]', self.namespaces))
+        text_block_cells.extend(shape_elem.findall('.//v:Cell[@N="TextDirection"]', self.namespaces))
+
+        for cell in text_block_cells:
+            cell_name = cell.get('N')
+            cell_value = self._evaluate_themed_cell(cell)
+
+            if cell_name == 'LeftMargin':
+                try:
+                    text_block_props['left_margin'] = float(cell_value) * self.visio_to_svg_scale
+                except (ValueError, TypeError):
+                    pass
+            elif cell_name == 'RightMargin':
+                try:
+                    text_block_props['right_margin'] = float(cell_value) * self.visio_to_svg_scale
+                except (ValueError, TypeError):
+                    pass
+            elif cell_name == 'TopMargin':
+                try:
+                    text_block_props['top_margin'] = float(cell_value) * self.visio_to_svg_scale
+                except (ValueError, TypeError):
+                    pass
+            elif cell_name == 'BottomMargin':
+                try:
+                    text_block_props['bottom_margin'] = float(cell_value) * self.visio_to_svg_scale
+                except (ValueError, TypeError):
+                    pass
+            elif cell_name == 'VerticalAlign':
+                text_block_props['vertical_align'] = cell_value
+            elif cell_name == 'TextBkgnd':
+                text_block_props['text_bkgnd'] = cell_value
+            elif cell_name == 'TextDirection':
+                text_block_props['text_direction'] = cell_value
+
+        return text_block_props
+
+    def _parse_shape_effects(self, shape_elem):
+        """Parse shape effects (shadows, bevels, blur, etc.) from shape element."""
+        effects = {
+            'shadow': {},
+            'bevel': {},
+            'blur': 0,
+            'glow': {},
+            'reflection': {}
+        }
+
+        # Find shadow-related cells
+        shadow_cells = shape_elem.findall('.//v:Cell[@N="ShdwForegnd"]', self.namespaces)
+        shadow_cells.extend(shape_elem.findall('.//v:Cell[@N="ShdwPattern"]', self.namespaces))
+        shadow_cells.extend(shape_elem.findall('.//v:Cell[@N="ShapeShdwOffsetX"]', self.namespaces))
+        shadow_cells.extend(shape_elem.findall('.//v:Cell[@N="ShapeShdwOffsetY"]', self.namespaces))
+        shadow_cells.extend(shape_elem.findall('.//v:Cell[@N="ShapeShdwType"]', self.namespaces))
+        shadow_cells.extend(shape_elem.findall('.//v:Cell[@N="ShapeShdwObliqueAngle"]', self.namespaces))
+        shadow_cells.extend(shape_elem.findall('.//v:Cell[@N="ShapeShdwScaleFactor"]', self.namespaces))
+        shadow_cells.extend(shape_elem.findall('.//v:Cell[@N="ShapeShdwBlur"]', self.namespaces))
+        shadow_cells.extend(shape_elem.findall('.//v:Cell[@N="ShapeShdwShow"]', self.namespaces))
+
+        # Theme shadow cells
+        shadow_cells.extend(shape_elem.findall('.//v:Cell[@N="msvThemeShadowColor"]', self.namespaces))
+        shadow_cells.extend(shape_elem.findall('.//v:Cell[@N="msvThemeShadowDirection"]', self.namespaces))
+        shadow_cells.extend(shape_elem.findall('.//v:Cell[@N="msvThemeShadowMagnification"]', self.namespaces))
+        shadow_cells.extend(shape_elem.findall('.//v:Cell[@N="msvThemeShadowPattern"]', self.namespaces))
+        shadow_cells.extend(shape_elem.findall('.//v:Cell[@N="msvThemeShadowStyle"]', self.namespaces))
+        shadow_cells.extend(shape_elem.findall('.//v:Cell[@N="msvThemeShadowTransparency"]', self.namespaces))
+        shadow_cells.extend(shape_elem.findall('.//v:Cell[@N="msvThemeShadowXOffset"]', self.namespaces))
+        shadow_cells.extend(shape_elem.findall('.//v:Cell[@N="msvThemeShadowYOffset"]', self.namespaces))
+
+        for cell in shadow_cells:
+            cell_name = cell.get('N')
+            cell_value = self._evaluate_themed_cell(cell)
+
+            if cell_name == 'ShdwForegnd' or cell_name == 'msvThemeShadowColor':
+                effects['shadow']['color'] = cell_value
+            elif cell_name == 'ShdwPattern' or cell_name == 'msvThemeShadowPattern':
+                effects['shadow']['pattern'] = cell_value
+            elif cell_name == 'ShapeShdwOffsetX' or cell_name == 'msvThemeShadowXOffset':
+                try:
+                    effects['shadow']['offset_x'] = float(cell_value) * self.visio_to_svg_scale
+                except (ValueError, TypeError):
+                    effects['shadow']['offset_x'] = 4
+            elif cell_name == 'ShapeShdwOffsetY' or cell_name == 'msvThemeShadowYOffset':
+                try:
+                    effects['shadow']['offset_y'] = float(cell_value) * self.visio_to_svg_scale
+                except (ValueError, TypeError):
+                    effects['shadow']['offset_y'] = 4
+            elif cell_name == 'ShapeShdwType':
+                effects['shadow']['type'] = cell_value
+            elif cell_name == 'ShapeShdwObliqueAngle':
+                effects['shadow']['angle'] = cell_value
+            elif cell_name == 'ShapeShdwScaleFactor':
+                effects['shadow']['scale'] = cell_value
+            elif cell_name == 'ShapeShdwBlur':
+                try:
+                    effects['shadow']['blur'] = float(cell_value) * self.visio_to_svg_scale
+                except (ValueError, TypeError):
+                    effects['shadow']['blur'] = 2
+            elif cell_name == 'ShapeShdwShow':
+                effects['shadow']['enabled'] = cell_value == '1'
+            elif cell_name == 'msvThemeShadowDirection':
+                effects['shadow']['direction'] = cell_value
+            elif cell_name == 'msvThemeShadowMagnification':
+                effects['shadow']['magnification'] = cell_value
+            elif cell_name == 'msvThemeShadowStyle':
+                effects['shadow']['style'] = cell_value
+            elif cell_name == 'msvThemeShadowTransparency':
+                effects['shadow']['transparency'] = cell_value
+
+        # Find bevel-related cells
+        bevel_cells = shape_elem.findall('.//v:Cell[@N="BevelTopType"]', self.namespaces)
+        bevel_cells.extend(shape_elem.findall('.//v:Cell[@N="BevelTopWidth"]', self.namespaces))
+        bevel_cells.extend(shape_elem.findall('.//v:Cell[@N="BevelTopHeight"]', self.namespaces))
+        bevel_cells.extend(shape_elem.findall('.//v:Cell[@N="BevelBottomType"]', self.namespaces))
+        bevel_cells.extend(shape_elem.findall('.//v:Cell[@N="BevelBottomWidth"]', self.namespaces))
+        bevel_cells.extend(shape_elem.findall('.//v:Cell[@N="BevelBottomHeight"]', self.namespaces))
+        bevel_cells.extend(shape_elem.findall('.//v:Cell[@N="BevelDepthColor"]', self.namespaces))
+        bevel_cells.extend(shape_elem.findall('.//v:Cell[@N="BevelDepthSize"]', self.namespaces))
+        bevel_cells.extend(shape_elem.findall('.//v:Cell[@N="BevelContourColor"]', self.namespaces))
+        bevel_cells.extend(shape_elem.findall('.//v:Cell[@N="BevelContourSize"]', self.namespaces))
+        bevel_cells.extend(shape_elem.findall('.//v:Cell[@N="BevelLightingType"]', self.namespaces))
+        bevel_cells.extend(shape_elem.findall('.//v:Cell[@N="BevelLightingAngle"]', self.namespaces))
+        bevel_cells.extend(shape_elem.findall('.//v:Cell[@N="BevelMaterialType"]', self.namespaces))
+
+        for cell in bevel_cells:
+            cell_name = cell.get('N')
+            cell_value = self._evaluate_themed_cell(cell)
+
+            if cell_name == 'BevelTopType':
+                effects['bevel']['top_type'] = cell_value
+            elif cell_name == 'BevelTopWidth':
+                try:
+                    effects['bevel']['top_width'] = float(cell_value) * self.visio_to_svg_scale
+                except (ValueError, TypeError):
+                    effects['bevel']['top_width'] = 0
+            elif cell_name == 'BevelTopHeight':
+                try:
+                    effects['bevel']['top_height'] = float(cell_value) * self.visio_to_svg_scale
+                except (ValueError, TypeError):
+                    effects['bevel']['top_height'] = 0
+            elif cell_name == 'BevelBottomType':
+                effects['bevel']['bottom_type'] = cell_value
+            elif cell_name == 'BevelBottomWidth':
+                try:
+                    effects['bevel']['bottom_width'] = float(cell_value) * self.visio_to_svg_scale
+                except (ValueError, TypeError):
+                    effects['bevel']['bottom_width'] = 0
+            elif cell_name == 'BevelBottomHeight':
+                try:
+                    effects['bevel']['bottom_height'] = float(cell_value) * self.visio_to_svg_scale
+                except (ValueError, TypeError):
+                    effects['bevel']['bottom_height'] = 0
+            elif cell_name == 'BevelDepthColor':
+                effects['bevel']['depth_color'] = cell_value
+            elif cell_name == 'BevelDepthSize':
+                try:
+                    effects['bevel']['depth_size'] = float(cell_value) * self.visio_to_svg_scale
+                except (ValueError, TypeError):
+                    effects['bevel']['depth_size'] = 0
+            elif cell_name == 'BevelContourColor':
+                effects['bevel']['contour_color'] = cell_value
+            elif cell_name == 'BevelContourSize':
+                try:
+                    effects['bevel']['contour_size'] = float(cell_value) * self.visio_to_svg_scale
+                except (ValueError, TypeError):
+                    effects['bevel']['contour_size'] = 0
+            elif cell_name == 'BevelLightingType':
+                effects['bevel']['lighting_type'] = cell_value
+            elif cell_name == 'BevelLightingAngle':
+                effects['bevel']['lighting_angle'] = cell_value
+            elif cell_name == 'BevelMaterialType':
+                effects['bevel']['material_type'] = cell_value
+
+        # Find blur effect
+        blur_cell = shape_elem.find('.//v:Cell[@N="Blur"]', self.namespaces)
+        if blur_cell is not None:
+            blur_value = self._evaluate_themed_cell(blur_cell)
+            try:
+                effects['blur'] = float(blur_value) * self.visio_to_svg_scale
+            except (ValueError, TypeError):
+                effects['blur'] = 0
+
+        # Debug: Print effects if found
+        if any(effects.values()):
+            print(f"  - Found effects for shape: shadow={bool(effects['shadow'])}, bevel={bool(effects['bevel'])}, blur={effects['blur']}")
+
+        return effects
 
     def _apply_style_properties_to_shape(self, shape_data, style_properties):
         """Apply resolved style properties to shape's SVG style."""
         # Line properties
         line_props = style_properties.get('line', {})
-        if 'LineColor' in line_props and line_props['LineColor'] in self.colors:
-            shape_data['style']['stroke'] = self.colors[line_props['LineColor']]
+        if 'LineColor' in line_props:
+            line_color = line_props['LineColor']
+            # Handle both direct color values and color index references
+            if line_color in self.colors:
+                shape_data['style']['stroke'] = self.colors[line_color]
+            elif line_color.startswith('#'):
+                shape_data['style']['stroke'] = line_color
+            elif line_color in self.theme_colors:
+                shape_data['style']['stroke'] = self.theme_colors[line_color]
+
         if 'LineWeight' in line_props:
             weight = max(0.5, float(line_props['LineWeight']) * self.visio_to_svg_scale)
             shape_data['style']['stroke_width'] = str(weight)
+
         if 'LinePattern' in line_props:
             # Convert Visio line patterns to SVG stroke-dasharray
             pattern = line_props['LinePattern']
@@ -319,14 +935,22 @@ class VsdxToSvgConverter:
                 shape_data['style']['stroke_dasharray'] = '5,3'
             elif pattern == '3':  # Dotted
                 shape_data['style']['stroke_dasharray'] = '1,2'
-        
+
         # Fill properties
         fill_props = style_properties.get('fill', {})
-        if 'FillForegnd' in fill_props and fill_props['FillForegnd'] in self.colors:
-            shape_data['style']['fill'] = self.colors[fill_props['FillForegnd']]
+        if 'FillForegnd' in fill_props:
+            fill_color = fill_props['FillForegnd']
+            # Handle both direct color values and color index references
+            if fill_color in self.colors:
+                shape_data['style']['fill'] = self.colors[fill_color]
+            elif fill_color.startswith('#'):
+                shape_data['style']['fill'] = fill_color
+            elif fill_color in self.theme_colors:
+                shape_data['style']['fill'] = self.theme_colors[fill_color]
+
         if 'FillPattern' in fill_props and fill_props['FillPattern'] == '0':
             shape_data['style']['fill'] = 'none'
-        
+
         # Text properties
         text_props = style_properties.get('text', {})
         if 'VerticalAlign' in text_props:
@@ -429,12 +1053,14 @@ class VsdxToSvgConverter:
         
         if width_cell is not None:
             try:
-                master_data['width'] = float(width_cell.get('V', '1'))
+                width_value = self._evaluate_themed_cell(width_cell)
+                master_data['width'] = float(width_value)
             except:
                 master_data['width'] = 1.0
         if height_cell is not None:
             try:
-                master_data['height'] = float(height_cell.get('V', '1'))
+                height_value = self._evaluate_themed_cell(height_cell)
+                master_data['height'] = float(height_value)
             except:
                 master_data['height'] = 1.0
 
@@ -579,7 +1205,7 @@ class VsdxToSvgConverter:
 
     def _shape_to_svg(self, shape):
         """Convert a shape to SVG element with CSS classes."""
-        if not shape['path'] and not shape['text'] and shape['width'] <= 0:
+        if not shape['path'] and not shape.get('text_runs') and shape['width'] <= 0:
             return None
             
         elements = []
@@ -622,24 +1248,271 @@ class VsdxToSvgConverter:
                           f'width="{width_px:.2f}" height="{height_px:.2f}"/>')
         
         # Add text if available
-        if shape['text']:
-            # Calculate text position
-            text_x = (shape['txt_pin_x'] - shape['x']) * self.visio_to_svg_scale if shape['txt_pin_x'] != 0 else 0
-            text_y = (shape['y'] - shape['txt_pin_y']) * self.visio_to_svg_scale if shape['txt_pin_y'] != 0 else 0
-            
-            # Clean up text content
-            clean_text = shape['text'].replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-            
-            text_style = dict(shape['style'])
-            text_css_class = self._generate_css_class(text_style)
-            
-            elements.append(f'  <text x="{text_x:.2f}" y="{text_y:.2f}" '
-                          f'class="{text_css_class}">'
-                          f'{clean_text}</text>')
+        if shape.get('text_runs') and shape['text_runs']:
+            text_svg = self._convert_text_runs_to_svg(shape)
+            if text_svg:
+                elements.append(text_svg)
         
         elements.append('</g>')
+
+        # Apply shape effects (shadows, bevels, blur) if any
+        elements = self._apply_effects_to_shape(shape, elements)
+
+        return '\n'.join(elements)
+
+    def _convert_text_runs_to_svg(self, shape):
+        """Convert text runs to SVG text elements with proper formatting."""
+        if not shape.get('text_runs'):
+            return None
+
+        elements = []
+        text_block = shape.get('text_block', {})
+
+        # Calculate text block position (using text block coordinate system)
+        # Default position if no specific text positioning is set
+        text_x = (shape['txt_pin_x'] - shape['x']) * self.visio_to_svg_scale if shape['txt_pin_x'] != 0 else 0
+        text_y = (shape['y'] - shape['txt_pin_y']) * self.visio_to_svg_scale if shape['txt_pin_y'] != 0 else 0
+
+        # Apply text block margins
+        text_x += text_block.get('left_margin', 0)
+
+        # Create a group for all text elements
+        elements.append(f'  <g class="text-block">')
+
+        current_y = text_y + text_block.get('top_margin', 0)
+        line_height = 12  # Default line height in pixels
+
+        for run in shape['text_runs']:
+            if not run['text'].strip():
+                continue
+
+            # Generate CSS class for this text run's character formatting
+            text_style = self._convert_char_props_to_css(run['char_props'])
+            text_css_class = self._generate_css_class(text_style)
+            
+            # Clean up text content
+            clean_text = run['text'].replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+
+            # Handle paragraph properties
+            para_props = run['para_props']
+            if para_props:
+                # Handle horizontal alignment
+                text_anchor = 'start'
+                if 'HorzAlign' in para_props:
+                    align_val = para_props['HorzAlign']
+                    if align_val == '1':  # Center
+                        text_anchor = 'middle'
+                    elif align_val == '2':  # Right
+                        text_anchor = 'end'
+
+                # Handle indentation
+                indent_left = 0
+                if 'IndLeft' in para_props:
+                    try:
+                        indent_left = float(para_props['IndLeft']) * self.visio_to_svg_scale
+                    except (ValueError, TypeError):
+                        pass
+
+                adjusted_x = text_x + indent_left
+            else:
+                adjusted_x = text_x
+                text_anchor = 'start'
+
+            # Handle text direction (vertical text)
+            text_direction = text_block.get('text_direction', '0')
+            if text_direction == '1':  # Vertical text
+                # For vertical text, we'll rotate the text element
+                transform = f' rotate(90 {adjusted_x:.2f} {current_y:.2f})'
+            else:
+                transform = ''
+
+            # Create text element
+            elements.append(f'    <text x="{adjusted_x:.2f}" y="{current_y:.2f}" '
+                          f'text-anchor="{text_anchor}" class="{text_css_class}"{transform}>'
+                          f'{clean_text}</text>')
+        
+            # Handle line breaks (simple implementation)
+            if '\n' in run['text'] or '\r' in run['text']:
+                current_y += line_height
+
+        elements.append('  </g>')
         
         return '\n'.join(elements)
+
+    def _convert_char_props_to_css(self, char_props):
+        """Convert Visio character properties to CSS style dictionary."""
+        css_style = {
+            'font-family': 'Arial, sans-serif',
+            'font-size': '10px',
+            'fill': 'black',
+            'font-weight': 'normal',
+            'font-style': 'normal',
+            'text-decoration': 'none'
+        }
+
+        if not char_props:
+            return css_style
+
+        # Font family
+        if 'Font' in char_props:
+            font_id = char_props['Font']
+            # Try to map font ID to font name (simplified)
+            font_names = {
+                '0': 'Arial',
+                '1': 'Times New Roman',
+                '2': 'Courier New',
+                '3': 'Symbol',
+                '4': 'Wingdings'
+            }
+            if font_id in font_names:
+                css_style['font-family'] = font_names[font_id]
+
+        # Font size
+        if 'Size' in char_props:
+            try:
+                size_points = float(char_props['Size'])
+                css_style['font-size'] = f'{size_points:.1f}px'
+            except (ValueError, TypeError):
+                pass
+
+        # Font color
+        if 'Color' in char_props:
+            color_id = char_props['Color']
+            if color_id in self.colors:
+                css_style['fill'] = self.colors[color_id]
+            elif color_id.startswith('#'):
+                css_style['fill'] = color_id
+            elif color_id in self.theme_colors:
+                css_style['fill'] = self.theme_colors[color_id]
+
+        # Font weight
+        if 'Style' in char_props:
+            style_val = char_props['Style']
+            if style_val and int(float(style_val)) & 1:  # Bold bit
+                css_style['font-weight'] = 'bold'
+            if style_val and int(float(style_val)) & 2:  # Italic bit
+                css_style['font-style'] = 'italic'
+            if style_val and int(float(style_val)) & 4:  # Underline bit
+                css_style['text-decoration'] = 'underline'
+
+        # Individual style properties
+        if 'DblUnderline' in char_props and char_props['DblUnderline'] == '1':
+            css_style['text-decoration'] = 'underline'
+
+        if 'Overline' in char_props and char_props['Overline'] == '1':
+            css_style['text-decoration'] = 'overline'
+
+        if 'Strikethru' in char_props and char_props['Strikethru'] == '1':
+            css_style['text-decoration'] = 'line-through'
+
+        return css_style
+
+    def _generate_svg_filters(self):
+        """Generate SVG filter definitions for shape effects."""
+        filters = []
+
+        # Generate filters for each shape that has effects
+        for shape_id in self.page_shapes:
+            if shape_id not in self.shapes:
+                continue
+
+            shape = self.shapes[shape_id]
+            effects = shape.get('effects', {})
+
+            # Check if shape has any effects that need SVG filters
+            has_shadow = effects.get('shadow', {}).get('enabled', False) and effects['shadow']
+            has_bevel = any(effects.get('bevel', {}).values())
+            has_blur = effects.get('blur', 0) > 0
+
+            if has_shadow or has_bevel or has_blur:
+                filter_id = f"filter-{shape_id}"
+                filter_def = self._create_svg_filter(filter_id, effects)
+                if filter_def:
+                    filters.append(filter_def)
+                    # Store filter reference for use in shape rendering
+                    shape['filter_id'] = filter_id
+
+        return '\n'.join(filters)
+
+    def _create_svg_filter(self, filter_id, effects):
+        """Create SVG filter definition for shape effects."""
+        filter_elements = []
+
+        # Add blur effect
+        if effects.get('blur', 0) > 0:
+            blur_radius = max(0.5, effects['blur'])
+            filter_elements.append(f'<feGaussianBlur stdDeviation="{blur_radius}"/>')
+
+        # Add shadow effect
+        shadow = effects.get('shadow', {})
+        if shadow.get('enabled', False) and shadow:
+            offset_x = shadow.get('offset_x', 4)
+            offset_y = shadow.get('offset_y', 4)
+            blur_radius = shadow.get('blur', 2)
+
+            # Shadow color - default to black with some transparency
+            shadow_color = shadow.get('color', '0')
+            if shadow_color in self.colors:
+                shadow_color = self.colors[shadow_color]
+            elif shadow_color.startswith('#'):
+                pass  # Already a hex color
+            else:
+                shadow_color = '#000000'
+
+            # Add opacity from transparency if available
+            opacity = 0.3  # Default shadow opacity
+            if 'transparency' in shadow:
+                try:
+                    # Visio transparency is usually 0-100, convert to 0-1
+                    opacity = 1.0 - (float(shadow['transparency']) / 100.0)
+                    opacity = max(0.1, min(1.0, opacity))
+                except (ValueError, TypeError):
+                    pass
+
+            filter_elements.append(f'<feDropShadow dx="{offset_x}" dy="{offset_y}" stdDeviation="{blur_radius}" flood-color="{shadow_color}" flood-opacity="{opacity}"/>')
+
+        # Add bevel effect (simplified - using multiple offset blurs to simulate 3D effect)
+        bevel = effects.get('bevel', {})
+        if any(bevel.values()):
+            # Create a simple bevel effect using multiple gaussian blurs and composites
+            bevel_height = bevel.get('top_height', 0) + bevel.get('bottom_height', 0)
+            if bevel_height > 0:
+                # Light highlight (top-left)
+                filter_elements.append('<feMorphology operator="dilate" radius="1"/>')
+                filter_elements.append('<feComposite in="SourceGraphic" operator="over"/>')
+                # Dark shadow (bottom-right)
+                filter_elements.append('<feMorphology operator="erode" radius="1"/>')
+                filter_elements.append('<feComposite in="SourceGraphic" operator="over"/>')
+
+        # If no effects, return None
+        if not filter_elements:
+            return None
+
+        # Create the complete filter definition
+        filter_content = '\n'.join(f'      {elem}' for elem in filter_elements)
+
+        return f'''    <filter id="{filter_id}" x="-50%" y="-50%" width="200%" height="200%">
+{filter_content}
+    </filter>'''
+
+    def _apply_effects_to_shape(self, shape, elements):
+        """Apply effects to shape elements by adding filter references."""
+        effects = shape.get('effects', {})
+        filter_id = shape.get('filter_id')
+
+        if filter_id and (effects.get('shadow', {}).get('enabled') or
+                         any(effects.get('bevel', {}).values()) or
+                         effects.get('blur', 0) > 0):
+            # Find the main shape element (path or rect) and add filter
+            for i, element in enumerate(elements):
+                if '<path' in element or '<rect' in element:
+                    # Add filter attribute to the element
+                    if 'filter=' not in element:
+                        # Insert filter attribute before the closing >
+                        elements[i] = element.replace('>', f' filter="url(#{filter_id})">')
+                    break
+
+        return elements
 
     def convert(self):
         """Main conversion method with enhanced style support."""
@@ -654,6 +1527,7 @@ class VsdxToSvgConverter:
         try:
             # Parse document components in correct order
             self._parse_colors(self.zf)
+            self._parse_themed_values(self.zf)  # Parse themes before styles to resolve themed values
             self._parse_styles(self.zf)
             self._parse_page_styles(self.zf)
             self._parse_masters(self.zf)
@@ -662,6 +1536,7 @@ class VsdxToSvgConverter:
             # Generate SVG content
             shapes_svg = self._generate_svg_content()
             css_styles = self._generate_css_styles()
+            svg_filters = self._generate_svg_filters()
             
             # Create complete SVG document
             svg_content = f'''<?xml version="1.0" encoding="UTF-8"?>
@@ -674,34 +1549,49 @@ class VsdxToSvgConverter:
   <desc>Generated by Enhanced VSDX to SVG Converter v3</desc>
   
   <!-- Define styles -->
-  <style type="text/css">
+    <style type="text/css">
     <![CDATA[
 {css_styles}
     
     /* Default Visio shape styles */
-    .visio-shape {{
-      fill: white;
-      stroke: black;
-      stroke-width: 1;
+      .visio-shape {{ 
+        fill: white; 
+        stroke: black; 
+        stroke-width: 1; 
       stroke-linecap: round;
       stroke-linejoin: round;
-    }}
-    .visio-text {{
-      font-family: Arial, sans-serif;
-      font-size: 10px;
-      text-anchor: middle;
-      dominant-baseline: middle;
+      }}
+      .visio-text {{
+        font-family: Arial, sans-serif;
+        font-size: 10px;
+        text-anchor: middle;
+        dominant-baseline: middle;
       fill: black;
+      }}
+    .text-block {{
+      /* Text block container styles */
     }}
     ]]>
-  </style>
+    </style>
+
+  <!-- Filters for shape effects -->
+  <defs>
+{svg_filters}
+  </defs>
   
   <!-- Shapes -->
 {shapes_svg}
   
 </svg>'''
             
+            # Count shapes with effects
+            shapes_with_effects = sum(1 for shape_id in self.page_shapes
+                                    if shape_id in self.shapes and
+                                    self.shapes[shape_id].get('effects') and
+                                    any(self.shapes[shape_id]['effects'].values()))
+
             print(f"Successfully converted {len(self.shapes)} shapes with {len(self.css_classes)} style classes")
+            print(f"Applied effects to {shapes_with_effects} shapes (shadows, bevels, blur)")
             return svg_content
 
         except Exception as e:
@@ -726,6 +1616,8 @@ if __name__ == '__main__':
     if svg_data:
         with open(output_svg_file, "w", encoding="utf-8") as f:
             f.write(svg_data)
-        print(f"\nConversion successful! SVG saved to '{output_svg_file}'")
+        print(f"\nConversion successful! Enhanced SVG with theme support saved to '{output_svg_file}'")
+        print(f"Processed {len(converter.shapes)} shapes with {len(converter.styles)} styles")
+        print(f"Found {len(converter.theme_properties)} theme properties")
     else:
         print("\nConversion failed.")
