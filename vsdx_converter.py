@@ -1,20 +1,12 @@
 import zipfile
 import xml.etree.ElementTree as ET
 import re
+import math
 
 class VsdxToSvgConverter:
     """
-    A custom scraper and renderer to convert .vsdx files to SVG format.
-
-    This class implements a pure Python solution to parse the XML structure
-    of a .vsdx file and generate an SVG representation of the first page.
-
-    Limitations:
-    - Only converts the first page of the Visio document.
-    - Handles basic shapes (rectangles, ellipses defined by geometry) and connectors.
-    - Basic text rendering (no complex formatting).
-    - Basic styling (stroke and fill are hardcoded for simplicity).
-    - Does not handle complex gradients, themes, layers, or embedded images.
+    Enhanced VSDX to SVG converter with proper style inheritance,
+    complete style property parsing, and CSS class generation.
     """
 
     def __init__(self, vsdx_file_path):
@@ -23,28 +15,24 @@ class VsdxToSvgConverter:
             'v': 'http://schemas.microsoft.com/office/visio/2012/main',
             'r': 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
         }
-        self.page_width = 0
-        self.page_height = 0
-        self.page_width_in_units = 0
-        self.page_height_in_units = 0
-        self.page_units = 'in'
+        
+        # Page properties with better scaling
+        self.page_width = 1190.55   # Standard A4 landscape width in pixels
+        self.page_height = 841.89   # Standard A4 landscape height in pixels
+        self.visio_to_svg_scale = 72.0  # Scale factor for coordinate conversion
+        
+        # Data structures
         self.masters = {}
         self.shapes = {}
-        self.connectors = {}
-        self.page_xml = None
-        self.master_rel_map = {}
-        # Unit conversion factors (Visio units to pixels)
-        self.unit_conversion = {
-            'MM': 3.779527559,      # 1 MM = 3.78 pixels (96 DPI)
-            'IN': 96.0,             # 1 IN = 96 pixels (96 DPI)
-            'PT': 1.333333333,      # 1 PT = 1.33 pixels
-            'CM': 37.795275591      # 1 CM = 37.8 pixels
-        }
-        # Style and color data
+        self.page_shapes = []
         self.styles = {}
+        self.page_styles = {}
         self.colors = {}
-        # Drawing scale factor (crucial for proper sizing)
-        self.drawing_scale = 1.0
+        self.css_classes = {}
+        self.class_counter = 1
+        
+        # Zip file reference
+        self.zf = None
 
     def _get_xml_tree(self, zip_file, xml_path):
         """Reads and parses an XML file from the zip archive."""
@@ -55,596 +43,37 @@ class VsdxToSvgConverter:
             print(f"Warning: XML file not found at {xml_path}")
             return None
 
-    def _parse_page_dimensions(self, zf):
-        """Parse page dimensions from pages.xml instead of page1.xml."""
-        print("Parsing page dimensions...")
-        
-        # Read pages.xml to get page dimensions
-        pages_tree = self._get_xml_tree(zf, 'visio/pages/pages.xml')
-        if not pages_tree:
-            print("Error: Could not find pages.xml file.")
-            return False
-        
-        # Find the PageSheet element in pages.xml
-        page_sheet = pages_tree.find('.//v:PageSheet', self.namespaces)
-        if page_sheet is None:
-            print("Error: Could not find PageSheet element in pages.xml.")
-            return False
-        
-        # Extract page dimensions from Cell elements
-        page_width_cell = page_sheet.find('.//v:Cell[@N="PageWidth"]', self.namespaces)
-        page_height_cell = page_sheet.find('.//v:Cell[@N="PageHeight"]', self.namespaces)
-        
-        # Get drawing scale (crucial for proper sizing)
-        drawing_scale_cell = page_sheet.find('.//v:Cell[@N="DrawingScale"]', self.namespaces)
-        if drawing_scale_cell is not None:
-            self.drawing_scale = float(drawing_scale_cell.get('V', '1.0'))
-            print(f"Drawing scale: {self.drawing_scale}")
-        
-        if page_width_cell is not None and page_height_cell is not None:
-            # Get values and units
-            width_val = float(page_width_cell.get('V', '0'))
-            height_val = float(page_height_cell.get('V', '0'))
-            width_units = page_width_cell.get('U', 'IN')  # Default to inches
-            height_units = page_height_cell.get('U', 'IN')
-            
-            # Store original dimensions and units
-            self.page_width_in_units = width_val
-            self.page_height_in_units = height_val
-            self.page_units = width_units.lower()
-
-            # Convert to pixels
-            self.page_width = width_val * self.unit_conversion.get(width_units, 96.0)
-            self.page_height = height_val * self.unit_conversion.get(height_units, 96.0)
-            
-            print(f"Page dimensions: {width_val} {width_units} x {height_val} {height_units} = {self.page_width:.1f} x {self.page_height:.1f} pixels")
-            return True
-        else:
-            print("Error: Could not find PageWidth or PageHeight cells in PageSheet.")
-            return False
-
-    def _parse_masters(self, zf):
-        """Parses all master shape definitions."""
-        print("Parsing master shapes...")
-        # First, find the relationship mapping for masters
-        rel_ns = {'rel': 'http://schemas.openxmlformats.org/package/2006/relationships'}
-        rels_tree = self._get_xml_tree(zf, 'visio/masters/_rels/masters.xml.rels')
-        if rels_tree:
-            for rel in rels_tree.findall('rel:Relationship', rel_ns):
-                self.master_rel_map[rel.get('Id')] = rel.get('Target')
-
-        # Now parse the master files
-        masters_tree = self._get_xml_tree(zf, 'visio/masters/masters.xml')
-        if not masters_tree:
-            return
-
-        print(f"Found {len(masters_tree.findall('v:Master', self.namespaces))} master definitions")
-        
-        for master in masters_tree.findall('v:Master', self.namespaces):
-            master_id = master.get('ID')
-            # Look for the Rel child element and get its r:id attribute
-            rel_elem = master.find('v:Rel', self.namespaces)
-            rel_id = rel_elem.get('{' + self.namespaces['r'] + '}id') if rel_elem is not None else None
-            
-            if rel_id and rel_id in self.master_rel_map:
-                master_file_path = f"visio/masters/{self.master_rel_map[rel_id]}"
-                master_tree = self._get_xml_tree(zf, master_file_path)
-                if master_tree:
-                    master_data = self._parse_master_geometry(master_tree)
-                    self.masters[master_id] = master_data
-                    print(f"Master {master_id}: {master_data}")
-                    if master_data['path']:
-                        print(f"Master {master_id}: Parsed geometry with path length {len(master_data['path'])}")
-                    else:
-                        print(f"Master {master_id}: No geometry path found")
-            else:
-                print(f"Master {master_id}: No relationship mapping found for {rel_id}")
-
-    def _parse_master_geometry(self, master_tree):
-        """Extracts geometry (as SVG path data) from a master shape XML."""
-        # Look for Section elements with N="Geometry"
-        geom_sections = master_tree.findall('.//v:Section[@N="Geometry"]', self.namespaces)
-        print(f"Found {len(geom_sections)} geometry sections")
-        print(f"Geom sections: {geom_sections}")
-        if not geom_sections:
-            return {'path': '', 'width': 1, 'height': 1} # Default if no geometry
-
-        path_data = ""
-        
-        # Get width and height with units
-        width_cell = master_tree.find('.//v:Cell[@N="Width"]', self.namespaces)
-        height_cell = master_tree.find('.//v:Cell[@N="Height"]', self.namespaces)
-        
-        width = float(width_cell.get('V', '1') if width_cell is not None else '1')
-        height = float(height_cell.get('V', '1') if height_cell is not None else '1')
-        
-        print(f"    Master dimensions: {width} x {height} (master units)")
-
-        # Process each geometry section
-        for geom_section in geom_sections:
-            print(f"  Processing geometry section: {geom_section.get('IX', 'unknown')}")
-            # Check if this section should be filled or just outlined
-            no_fill = geom_section.findtext('.//v:NoFill', namespaces=self.namespaces) == '1'
-            no_line = geom_section.findtext('.//v:NoLine', namespaces=self.namespaces) == '1'
-            
-            # Process each row in the geometry section
-            rows = geom_section.findall('v:Row', self.namespaces)
-            print(f"    Found {len(rows)} rows in this section")
-            for row in rows:
-                row_type = row.get('T')  # The type of geometry command
-                print(f"      Row type: {row_type}")
-                
-                # Look for X and Y in Cell elements
-                x_cell = row.find('v:Cell[@N="X"]', self.namespaces)
-                y_cell = row.find('v:Cell[@N="Y"]', self.namespaces)
-                
-                x = x_cell.get('V') if x_cell is not None else None
-                y = y_cell.get('V') if y_cell is not None else None
-                x_units = x_cell.get('U') if x_cell is not None else None
-                y_units = y_cell.get('U') if y_cell is not None else None
-                x_formula = x_cell.get('F') if x_cell is not None else None
-                y_formula = y_cell.get('F') if y_cell is not None else None
-                
-                print(f"      X: {x} {x_units} (F: {x_formula}), Y: {y} {y_units} (F: {y_formula})")
-                
-                if x and y:
-                    # Convert Visio coordinates to SVG path coordinates
-                    # Handle formulas if present
-                    if x_formula and 'Width' in x_formula:
-                        # X is relative to width (e.g., "Width*0" = left edge, "Width*1" = right edge)
-                        x_val = float(x) * width
-                    else:
-                        x_val = float(x)
-                        
-                    if y_formula and 'Height' in y_formula:
-                        # Y is relative to height (e.g., "Height*0.5" = center)
-                        y_val = float(y) * height
-                    else:
-                        y_val = float(y)
-                    
-                    # Convert to SVG coordinates (invert Y axis)
-                    # Visio uses bottom-left origin, SVG uses top-left origin
-                    px = x_val
-                    py = height - y_val
-                    
-                    print(f"        Calculated: px={px:.1f}, py={py:.1f}")
-                    
-                    if row_type == 'MoveTo':
-                        path_data += f"M {px} {py} "
-                    elif row_type == 'LineTo':
-                        path_data += f"L {px} {py} "
-                    elif row_type == 'EllipticalArcTo':
-                        # Handle elliptical arcs if present
-                        path_data += f"A {px} {py} 0 0 1 {px} {py} "
-                    elif row_type == 'ArcTo':
-                        # Handle arcs if present
-                        path_data += f"A {px} {py} 0 0 1 {px} {py} "
-            
-            # Close the path if it's a filled shape
-            if not no_fill and path_data:
-                path_data += "Z "
-
-        return {'path': path_data.strip(), 'width': width, 'height': height}
-
-
-    def _parse_page_shapes(self):
-        """Parses all shapes on the first page."""
-        print("Parsing page shapes...")
-        
-        # Parse shapes from page1.xml
-        for shape in self.page_xml.findall('.//v:Shape', self.namespaces):
-            shape_id = shape.get('ID')
-            master_id = shape.get('Master')
-            
-            # Parse additional shape attributes
-            line_style = shape.get('LineStyle')
-            fill_style = shape.get('FillStyle')
-            text_style = shape.get('TextStyle')
-            name_u = shape.get('NameU')
-            name = shape.get('Name')
-            unique_id = shape.get('UniqueID')
-            
-            # Try to get transform data from Xf element first
-            xf = shape.find('v:Xf', self.namespaces)
-            if xf is not None:
-                # Shape has explicit transform data
-                width_val = float(xf.findtext('v:Width', namespaces=self.namespaces) or '0.1')
-                height_val = float(xf.findtext('v:Height', namespaces=self.namespaces) or '0.1')
-                pin_x_val = float(xf.findtext('v:PinX', namespaces=self.namespaces) or '0')
-                pin_y_val = float(xf.findtext('v:PinY', namespaces=self.namespaces) or '0')
-                angle = float(xf.findtext('v:Angle', namespaces=self.namespaces) or '0')
-                
-                # Convert to pixels (assuming inches)
-                width = width_val * 96.0
-                height = height_val * 96.0
-                pin_x = pin_x_val * 96.0
-                pin_y = pin_y_val * 96.0
-            else:
-                # Try to get data from Cell elements - look for specific Cell names
-                width_cell = shape.find('.//v:Cell[@N="Width"]', self.namespaces)
-                height_cell = shape.find('.//v:Cell[@N="Height"]', self.namespaces)
-                pin_x_cell = shape.find('.//v:Cell[@N="PinX"]', self.namespaces)
-                pin_y_cell = shape.find('.//v:Cell[@N="PinY"]', self.namespaces)
-                angle_cell = shape.find('.//v:Cell[@N="Angle"]', self.namespaces)
-                
-                # Get values and units
-                width_val = float(width_cell.get('V', '0.1') if width_cell is not None else '0.1')
-                height_val = float(height_cell.get('V', '0.1') if height_cell is not None else '0.1')
-                pin_x_val = float(pin_x_cell.get('V', '0') if pin_x_cell is not None else '0')
-                pin_y_val = float(pin_y_cell.get('V', '0') if pin_y_cell is not None else '0')
-                angle = float(angle_cell.get('V', '0') if angle_cell is not None else '0')
-                
-                # Get units (default to inches if not specified)
-                width_units = width_cell.get('U', 'IN') if width_cell is not None else 'IN'
-                height_units = height_cell.get('U', 'IN') if height_cell is not None else 'IN'
-                pin_x_units = pin_x_cell.get('U', 'IN') if pin_x_cell is not None else 'IN'
-                pin_y_units = pin_y_cell.get('U', 'IN') if pin_y_cell is not None else 'IN'
-                
-                # Convert to pixels
-                width = width_val * self.unit_conversion.get(width_units, 96.0)
-                height = height_val * self.unit_conversion.get(height_units, 96.0)
-                pin_x = pin_x_val * self.unit_conversion.get(pin_x_units, 96.0)
-                pin_y = pin_y_val * self.unit_conversion.get(pin_y_units, 96.0)
-            
-            # Get text content
-            text_elem = shape.find('.//v:Text', self.namespaces)
-            text = ""
-            text_style_details = {}
-            if text_elem is not None:
-                # Extract text from various text elements
-                for text_part in text_elem.iter():
-                    if text_part.text and text_part.text.strip():
-                        text += text_part.text.strip() + " "
-                text = text.strip()
-                
-                # Parse Character section for text styling
-                char_sections = shape.findall('.//v:Section[@N="Character"]', self.namespaces)
-                for char_section in char_sections:
-                    for char_row in char_section.findall('v:Row', self.namespaces):
-                        for cell in char_row.findall('v:Cell', self.namespaces):
-                            cell_name = cell.get('N')
-                            cell_value = cell.get('V')
-                            if cell_name:
-                                text_style_details[cell_name] = cell_value
-
-            # Reset connector data for each shape
-            is_connector = 'Connector' in (name_u or '')
-            connector_data = None
-
-            if is_connector:
-                connector_data = {
-                    'from_sheet': None,
-                    'to_sheet': None
-                }
-                begin_x_cell = shape.find('.//v:Cell[@N="BeginX"]', self.namespaces)
-                end_x_cell = shape.find('.//v:Cell[@N="EndX"]', self.namespaces)
-
-                if begin_x_cell is not None and begin_x_cell.get('F'):
-                    formula = begin_x_cell.get('F')
-                    match = re.search(r'Sheet\.(\d+)!', formula)
-                    if match:
-                        connector_data['from_sheet'] = match.group(1)
-
-                if end_x_cell is not None and end_x_cell.get('F'):
-                    formula = end_x_cell.get('F')
-                    match = re.search(r'Sheet\.(\d+)!', formula)
-                    if match:
-                        connector_data['to_sheet'] = match.group(1)
-                
-                if connector_data['from_sheet'] and connector_data['to_sheet']:
-                    self.connectors[shape_id] = connector_data
-
-
-            shape_data = {
-                'id': shape_id,
-                'master_id': master_id,
-                'width': width,
-                'height': height,
-                'pin_x': pin_x,
-                'pin_y': pin_y,
-                'angle': angle,
-                'text': text,
-                'text_style_details': text_style_details,
-                'line_style': line_style,
-                'fill_style': fill_style,
-                'text_style': text_style,
-                'name_u': name_u,
-                'name': name,
-                'unique_id': unique_id
-            }
-            
-            self.shapes[shape_id] = shape_data
-        
-        print(f"Parsed {len(self.shapes)} shapes and {len(self.connectors)} connectors")
-        
-        # Debug: Show some shape details
-        for i, (shape_id, shape_data) in enumerate(list(self.shapes.items())[:5]):
-            print(f"  Shape {shape_id}: master={shape_data['master_id']}, size={shape_data['width']:.3f}x{shape_data['height']:.3f}, pos=({shape_data['pin_x']:.3f}, {shape_data['pin_y']:.3f})")
-        
-        # Debug: Show connector details
-        for i, (conn_id, conn_data) in enumerate(list(self.connectors.items())[:5]):
-            print(f"  Connector {conn_id}: from={conn_data['from_sheet']}, to={conn_data['to_sheet']}")
-        
-        return True
-
-    def _generate_svg_content(self):
-        """Generates the SVG content from parsed data."""
-        print("Generating SVG content...")
-        svg_elements = []
-        
-        # Process regular shapes first
-        for shape_id, shape_data in self.shapes.items():
-            if shape_id in self.connectors:
-                continue # Skip connectors for now
-
-            master = self.masters.get(shape_data['master_id'])
-            if not master or not master['path']:
-                # If no master geometry,    draw a simple rectangle
-                svg_path = f"M 0 0 L {shape_data['width']} 0 L {shape_data['width']} {shape_data['height']} L 0 {shape_data['height']} Z"
-                print(f"Shape {shape_id}: Using default rectangle (no master geometry)")
-            else:
-                svg_path = master['path']
-                print(f"Shape {shape_id}: Using master geometry from {shape_data['master_id']}")
-
-            # Calculate position. Visio's PinX/PinY is the center of the shape.
-            # SVG's x/y is the top-left corner.
-            x = shape_data['pin_x'] - (shape_data['width'] / 2)
-            y = self.page_height - (shape_data['pin_y'] + (shape_data['height'] / 2)) # Invert Y for SVG's top-left origin
-
-            # Create a group for the shape and its text to apply transforms
-            transform = f"translate({x}, {y})"
-            if shape_data['angle'] != 0:
-                # SVG rotates around the origin (0,0), so we translate to center for rotation
-                rot_x = shape_data['width'] / 2
-                rot_y = shape_data['height'] / 2
-                transform += f" rotate({-shape_data['angle'] * 180 / 3.14159}, {rot_x}, {rot_y})"
-            
-            svg_elements.append(f'<g transform="{transform}">')
-            
-            # Scale the master path to the shape's actual size
-            scale_x = shape_data['width'] / master['width'] if master and master['width'] != 0 else 1
-            scale_y = shape_data['height'] / master['height'] if master and master['height'] != 0 else 1
-            path_transform = f"scale({scale_x} {scale_y})"
-
-            # Get styling for this shape
-            style_info = self._get_shape_style(shape_data)
-            
-            # Create SVG path with proper styling
-            svg_style = f"fill:{style_info['fill_color']};stroke:{style_info['line_color']};stroke-width:{style_info['line_weight']};"
-            svg_elements.append(f'  <path d="{svg_path}" transform="{path_transform}" style="{svg_style}" />')
-
-            if shape_data['text']:
-                # Enhanced text styling using Character section details
-                text_x = shape_data['width'] / 2
-                text_y = shape_data['height'] / 2
-                
-                # Use text style details if available, otherwise use default style
-                text_font = shape_data['text_style_details'].get('Font', style_info['text_font'])
-                text_size = shape_data['text_style_details'].get('Size', style_info['text_size'])
-                text_color = shape_data['text_style_details'].get('Color', style_info['text_color'])
-                
-                text_style = f"font-family:{text_font};font-size:{text_size}px;fill:{text_color};"
-                svg_elements.append(f'  <text x="{text_x}" y="{text_y}" dominant-baseline="middle" text-anchor="middle" style="{text_style}">{shape_data["text"]}</text>')
-            
-            svg_elements.append('</g>')
-
-        # Process connectors with enhanced details
-        for conn_id, conn_data in self.connectors.items():
-            # Debug: Print full connector data
-            print(f"Processing Connector {conn_id}: {conn_data}")
-            
-            # Try to find connection points with specific IX or T attributes
-            from_point = None
-            to_point = None
-            
-            for point in conn_data.get('connection_points', []):
-                # Look for connection points with specific characteristics
-                if point.get('IX') == '1':
-                    from_point = point
-                elif point.get('IX') == '2':
-                    to_point = point
-            
-            # If we can't find points by IX, try other methods
-            if not (from_point and to_point):
-                print(f"Warning: Could not find both connection points for connector {conn_id}")
-                continue
-            
-            # Try to find the connected shapes
-            from_shape = None
-            to_shape = None
-            
-            # Look for Y coordinates or other identifying information
-            if from_point and 'Y' in from_point['cells']:
-                from_y = float(from_point['cells']['Y']['value'])
-                for shape_id, shape_data in self.shapes.items():
-                    # Check if shape's Y coordinate is close to the connection point
-                    if abs(shape_data['pin_y'] - from_y) < 0.1:
-                        from_shape = shape_data
-                        break
-            
-            if to_point and 'Y' in to_point['cells']:
-                to_y = float(to_point['cells']['Y']['value'])
-                for shape_id, shape_data in self.shapes.items():
-                    # Check if shape's Y coordinate is close to the connection point
-                    if abs(shape_data['pin_y'] - to_y) < 0.1:
-                        to_shape = shape_data
-                        break
-            
-            # If we found both shapes, draw a connector
-            if from_shape and to_shape:
-                x1 = from_shape['pin_x']
-                y1 = from_shape['pin_y']
-                x2 = to_shape['pin_x']
-                y2 = to_shape['pin_y']
-                
-                print(f"Drawing connector from ({x1:.1f}, {y1:.1f}) to ({x2:.1f}, {y2:.1f})")
-                
-                # Enhanced connector styling
-                connector_style = "stroke:#000000;stroke-width:1;"
-                
-                # Check if there are additional connection point details
-                if conn_data.get('connection_points'):
-                    # You could use connection point details to modify the line style
-                    # For example, check for line weight or color in connection details
-                    pass
-                
-                svg_elements.append(f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" style="{connector_style}" />')
-            else:
-                print(f"Warning: Connector {conn_id} could not find both connected shapes")
-                # Optionally, print out the Y coordinates we were looking for
-                if from_point and 'Y' in from_point['cells']:
-                    print(f"  From Y: {from_point['cells']['Y']['value']}")
-                if to_point and 'Y' in to_point['cells']:
-                    print(f"  To Y: {to_point['cells']['Y']['value']}")
-                print(f"  Available shape Y coordinates: {[shape['pin_y'] for shape in self.shapes.values()]}")
-
-        return "\n".join(svg_elements)
-
-    def _normalize_coordinates(self):
-        """
-        Normalize shape coordinates to fit within a standard page layout.
-        This mimics Visio's coordinate transformation.
-        """
-        if not self.shapes:
-            return
-
-        # Find coordinate ranges
-        min_x = min(shape['pin_x'] - shape['width']/2 for shape in self.shapes.values())
-        max_x = max(shape['pin_x'] + shape['width']/2 for shape in self.shapes.values())
-        min_y = min(shape['pin_y'] - shape['height']/2 for shape in self.shapes.values())
-        max_y = max(shape['pin_y'] + shape['height']/2 for shape in self.shapes.values())
-
-        # Calculate scaling factors
-        page_width = 1190.55   # Standard A4 landscape width in points
-        page_height = 841.89   # Standard A4 landscape height in points
-        
-        x_scale = page_width / (max_x - min_x)
-        y_scale = page_height / (max_y - min_y)
-        scale = min(x_scale, y_scale)
-
-        # Normalize each shape's coordinates
-        for shape_id, shape_data in self.shapes.items():
-            # Center the shape relative to the page
-            shape_data['pin_x'] = (shape_data['pin_x'] - min_x) * scale
-            shape_data['pin_y'] = (shape_data['pin_y'] - min_y) * scale
-            
-            # Scale shape dimensions
-            shape_data['width'] *= scale
-            shape_data['height'] *= scale
-
-        # Update page dimensions to match normalized coordinates
-        self.page_width = page_width
-        self.page_height = page_height
-        self.page_width_in_units = 16.5354  # A4 landscape width in inches
-        self.page_height_in_units = 11.6929  # A4 landscape height in inches
-        self.page_units = 'in'
-
-    def convert(self):
-        """Main conversion method."""
-        try:
-            with zipfile.ZipFile(self.vsdx_file_path, 'r') as zf:
-                # First, parse page dimensions from pages.xml
-                if not self._parse_page_dimensions(zf):
-                    return None
-                
-                # Define the namespace for the relationships file, which has a default namespace
-                rel_ns = {'rel': 'http://schemas.openxmlformats.org/package/2006/relationships'}
-                
-                # Find the relationship file for pages to locate the first page XML
-                page_rels_tree = self._get_xml_tree(zf, 'visio/pages/_rels/pages.xml.rels')
-                if page_rels_tree is None:
-                    print("Error: Could not find page relationships file ('visio/pages/_rels/pages.xml.rels').")
-                    return None
-
-                # Find the first relationship target, which should be the first page (e.g., page1.xml)
-                first_rel_node = page_rels_tree.find('rel:Relationship', rel_ns)
-                if first_rel_node is None:
-                    print("Error: No relationship found in pages.xml.rels file.")
-                    return None
-                
-                page_path_target = first_rel_node.get('Target')
-                if not page_path_target:
-                    print("Error: Relationship node found but it has no Target attribute.")
-                    return None
-
-                page_xml_path = f"visio/pages/{page_path_target}"
-                
-                page_tree = self._get_xml_tree(zf, page_xml_path)
-                if page_tree is None:
-                    print(f"Error: Could not parse page XML at '{page_xml_path}'")
-                    return None
-                self.page_xml = page_tree.getroot()
-                
-                # Parse styles and colors first
-                self._parse_colors(zf)
-                self._parse_styles(zf)
-                
-                self._parse_masters(zf)
-                
-                # Check for failure in parsing page shapes before continuing
-                if not self._parse_page_shapes():
-                    return None # Stop conversion if page parsing fails
-                
-                # Normalize coordinates to match Visio's layout
-                self._normalize_coordinates()
-                
-                svg_content = self._generate_svg_content()
-                
-                # Assemble the final SVG file
-                svg_output = f'<svg width="{self.page_width_in_units}{self.page_units}" height="{self.page_height_in_units}{self.page_units}" viewBox="0 0 {self.page_width} {self.page_height}" xmlns="http://www.w3.org/2000/svg">\n'
-                svg_output += svg_content
-                svg_output += '\n</svg>'
-                
-                return svg_output
-
-        except FileNotFoundError:
-            print(f"Error: File not found at {self.vsdx_file_path}")
-            return None
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")
-            import traceback
-            traceback.print_exc()
-            return None
-
     def _parse_colors(self, zf):
         """Parse color definitions from document.xml."""
         print("Parsing colors...")
         
         document_tree = self._get_xml_tree(zf, 'visio/document.xml')
         if not document_tree:
-            print("Warning: Could not find document.xml for colors")
             return
         
-        # Parse color entries
         for color_elem in document_tree.findall('.//v:ColorEntry', self.namespaces):
             color_id = color_elem.get('IX')
             rgb_value = color_elem.get('RGB')
             if color_id and rgb_value:
-                self.colors[color_id] = rgb_value
-                print(f"  Color {color_id}: {rgb_value}")
-        
-        print(f"Parsed {len(self.colors)} colors")
+                try:
+                    if rgb_value.startswith('#'):
+                        self.colors[color_id] = rgb_value
+                    else:
+                        # Convert numeric RGB to hex
+                        rgb_int = int(rgb_value)
+                        hex_color = f"#{rgb_int:06x}"
+                        self.colors[color_id] = hex_color
+                except:
+                    self.colors[color_id] = '#000000'
 
     def _parse_styles(self, zf):
-        """Parse style definitions from document.xml with more comprehensive details."""
+        """Parse style definitions from document.xml with complete property support."""
         print("Parsing styles...")
         
         document_tree = self._get_xml_tree(zf, 'visio/document.xml')
         if not document_tree:
-            print("Warning: Could not find document.xml for styles")
             return
         
-        # Parse color entries first
-        self.colors = {}
-        for color_elem in document_tree.findall('.//v:ColorEntry', self.namespaces):
-            color_id = color_elem.get('IX')
-            rgb_value = color_elem.get('RGB')
-            if color_id and rgb_value:
-                self.colors[color_id] = rgb_value
-                print(f"  Color {color_id}: {rgb_value}")
-        
-        # Parse style sheets
-        self.styles = {}
         for style_elem in document_tree.findall('.//v:StyleSheet', self.namespaces):
             style_id = style_elem.get('ID')
             name = style_elem.get('NameU', 'Unknown')
@@ -653,100 +82,644 @@ class VsdxToSvgConverter:
                 style_data = {
                     'id': style_id,
                     'name': name,
-                    'line_style': style_elem.get('LineStyle'),
-                    'fill_style': style_elem.get('FillStyle'),
-                    'text_style': style_elem.get('TextStyle'),
                     'properties': {}
                 }
                 
-                # Parse style properties from Cell elements
-                for cell_elem in style_elem.findall('.//v:Cell', self.namespaces):
+                # Parse ALL style properties
+                for cell_elem in style_elem.findall('v:Cell', self.namespaces):
                     cell_name = cell_elem.get('N')
-                    cell_value = cell_elem.get('V')
-                    cell_formula = cell_elem.get('F')
-                    
-                    if cell_name and cell_value:
-                        # Handle color references and themed values
-                        if cell_name in ['LineColor', 'FillForegnd', 'FillBkgnd', 'Color']:
-                            if cell_value.isdigit():
-                                cell_value = self.colors.get(cell_value, cell_value)
-                            elif cell_value == 'Themed':
-                                cell_value = None  # Placeholder for themed colors
-                        
-                        style_data['properties'][cell_name] = {
-                            'value': cell_value,
-                            'formula': cell_formula,
-                            'inherited': cell_formula == 'Inh'
-                        }
+                    cell_value = cell_elem.get('V', '0')
+                    style_data['properties'][cell_name] = cell_value
                 
                 self.styles[style_id] = style_data
-                print(f"  Style {style_id}: {name}")
-        
-        print(f"Parsed {len(self.colors)} colors and {len(self.styles)} styles")
+                print(f"  - Parsed Style {style_id}: {name}")
 
-    def _get_style_property(self, style_id, property_name, default_value=None):
-        """Get a property value from a style, handling inheritance and themed values."""
-        if style_id not in self.styles:
-            return default_value
+    def _parse_page_styles(self, zf):
+        """Parse page-level styles from page XML files."""
+        print("Parsing page styles...")
         
-        style = self.styles[style_id]
-        if property_name in style['properties']:
-            prop = style['properties'][property_name]
-            value = prop['value']
-            
-            # Handle inherited or themed values
-            if prop['inherited'] or value is None:
-                # Look for parent style
-                parent_style_id = style.get('line_style') or style.get('fill_style') or style.get('text_style')
-                if parent_style_id and parent_style_id != style_id:
-                    return self._get_style_property(parent_style_id, property_name, default_value)
-                return default_value
-            
-            return value
+        # Parse page styles from masters
+        masters_tree = self._get_xml_tree(zf, 'visio/masters/masters.xml')
+        if masters_tree:
+            for master in masters_tree.findall('v:Master', self.namespaces):
+                page_sheet = master.find('v:PageSheet', self.namespaces)
+                if page_sheet is not None:
+                    master_id = master.get('ID')
+                    page_style_data = self._parse_page_sheet_properties(page_sheet)
+                    self.page_styles[f"master_{master_id}"] = page_style_data
         
-        return default_value
+        # Parse page styles from main page
+        page_xml_path = 'visio/pages/page1.xml'
+        try:
+            page_rels_tree = self._get_xml_tree(zf, 'visio/pages/_rels/pages.xml.rels')
+            if page_rels_tree is not None:
+                rel_ns = {'rel': 'http://schemas.openxmlformats.org/package/2006/relationships'}
+                first_rel = page_rels_tree.find('.//rel:Relationship', rel_ns)
+                if first_rel is not None:
+                    target = first_rel.get('Target')
+                    if target:
+                        page_xml_path = f'visio/pages/{target}'
+        except:
+            pass
 
-    def _get_shape_style(self, shape_data):
-        """Get the complete styling for a shape with enhanced inheritance."""
-        style_info = {
-            'line_color': '#000000',      # Default black
-            'line_weight': '1',           # Default 1px
-            'fill_color': '#ffffff',      # Default white
-            'text_color': '#000000',      # Default black
-            'text_size': '12',            # Default 12px
-            'text_font': 'Arial'          # Default Arial
+        page_tree = self._get_xml_tree(zf, page_xml_path)
+        if page_tree:
+            page_sheet = page_tree.find('.//v:PageSheet', self.namespaces)
+            if page_sheet is not None:
+                page_style_data = self._parse_page_sheet_properties(page_sheet)
+                self.page_styles['page'] = page_style_data
+
+    def _parse_page_sheet_properties(self, page_sheet_elem):
+        """Parse properties from a PageSheet element."""
+        properties = {}
+        for cell_elem in page_sheet_elem.findall('v:Cell', self.namespaces):
+            cell_name = cell_elem.get('N')
+            cell_value = cell_elem.get('V', '0')
+            properties[cell_name] = cell_value
+        return properties
+
+    def _resolve_style_inheritance(self, style_id):
+        """Resolve style inheritance chain and return combined properties."""
+        if not style_id or style_id not in self.styles:
+            return {}
+        
+        combined_properties = {}
+        current_style_id = style_id
+        
+        # Walk up the inheritance chain (typically: specific style -> root style "0")
+        while current_style_id:
+            if current_style_id in self.styles:
+                current_style = self.styles[current_style_id]
+                
+                # Add properties from current style (child overrides parent)
+                for prop_name, prop_value in current_style['properties'].items():
+                    if prop_name not in combined_properties:  # Don't override if already set
+                        combined_properties[prop_name] = prop_value
+                
+                # Check if this style inherits from another
+                if 'Style' in current_style['properties']:
+                    parent_style_id = current_style['properties']['Style']
+                    if parent_style_id != current_style_id:  # Avoid infinite loops
+                        current_style_id = parent_style_id
+                    else:
+                        break
+                else:
+                    break
+            else:
+                break
+        
+        return combined_properties
+
+    def _get_shape_style_properties(self, shape_elem):
+        """Get combined style properties for a shape considering inheritance."""
+        # Get style references from shape
+        line_style_id = shape_elem.get('LineStyle')
+        fill_style_id = shape_elem.get('FillStyle') 
+        text_style_id = shape_elem.get('TextStyle')
+        
+        # Resolve inheritance for each style type
+        line_properties = self._resolve_style_inheritance(line_style_id) if line_style_id else {}
+        fill_properties = self._resolve_style_inheritance(fill_style_id) if fill_style_id else {}
+        text_properties = self._resolve_style_inheritance(text_style_id) if text_style_id else {}
+        
+        # Also check for direct Style attribute
+        direct_style_id = shape_elem.get('Style')
+        if direct_style_id:
+            direct_properties = self._resolve_style_inheritance(direct_style_id)
+            # Direct style properties override the specific style types
+            line_properties.update(direct_properties)
+            fill_properties.update(direct_properties)
+            text_properties.update(direct_properties)
+        
+        return {
+            'line': line_properties,
+            'fill': fill_properties,
+            'text': text_properties
         }
-        
-        # Get line style properties
-        if 'line_style' in shape_data and shape_data['line_style']:
-            line_style_id = shape_data['line_style']
-            style_info['line_color'] = self._get_style_property(line_style_id, 'LineColor', '#000000')
-            style_info['line_weight'] = self._get_style_property(line_style_id, 'LineWeight', '1')
-        
-        # Get fill style properties
-        if 'fill_style' in shape_data and shape_data['fill_style']:
-            fill_style_id = shape_data['fill_style']
-            style_info['fill_color'] = self._get_style_property(fill_style_id, 'FillForegnd', '#ffffff')
-        
-        # Get text style properties
-        if 'text_style' in shape_data and shape_data['text_style']:
-            text_style_id = shape_data['text_style']
-            style_info['text_color'] = self._get_style_property(text_style_id, 'Color', '#000000')
-            style_info['text_size'] = self._get_style_property(text_style_id, 'Size', '12')
-            style_info['text_font'] = self._get_style_property(text_style_id, 'Font', 'Arial')
-        
-        return style_info
 
-# --- HOW TO USE THIS SCRIPT ---
+    def _parse_shape(self, shape_elem):
+        """Parse a single shape element with enhanced style support."""
+        shape_id = shape_elem.get('ID')
+        if not shape_id:
+            return None
+        
+        shape_data = {
+            'id': shape_id,
+            'name': shape_elem.get('NameU', f'Shape{shape_id}'),
+            'type': shape_elem.get('Type', 'Shape'),
+            'master_id': shape_elem.get('Master'),
+            'x': 0, 'y': 0, 'width': 1, 'height': 1,
+            'angle': 0,
+            'loc_pin_x': 0, 'loc_pin_y': 0,
+            'txt_pin_x': 0, 'txt_pin_y': 0,
+            'txt_width': 0, 'txt_height': 0,
+            'path': '',
+            'text': '',
+            'style': {
+                'fill': '#ffffff',
+                'stroke': '#000000',
+                'stroke_width': '1'
+            },
+            'properties': {}
+        }
+
+        # Get combined style properties with inheritance
+        style_properties = self._get_shape_style_properties(shape_elem)
+        
+        # Parse all cells to get shape properties and override style properties
+        for cell in shape_elem.findall('.//v:Cell', self.namespaces):
+            prop_name = cell.get('N')
+            prop_value = cell.get('V', '0')
+            
+            if not prop_name:
+                continue
+                
+            shape_data['properties'][prop_name] = prop_value
+            
+            try:
+                # Extract positioning properties
+                if prop_name == 'PinX':
+                    shape_data['x'] = float(prop_value)
+                elif prop_name == 'PinY':
+                    shape_data['y'] = float(prop_value)
+                elif prop_name == 'Width':
+                    shape_data['width'] = float(prop_value)
+                elif prop_name == 'Height':
+                    shape_data['height'] = float(prop_value)
+                elif prop_name == 'LocPinX':
+                    shape_data['loc_pin_x'] = float(prop_value)
+                elif prop_name == 'LocPinY':
+                    shape_data['loc_pin_y'] = float(prop_value)
+                elif prop_name == 'Angle':
+                    shape_data['angle'] = float(prop_value)
+                elif prop_name == 'TxtPinX':
+                    shape_data['txt_pin_x'] = float(prop_value)
+                elif prop_name == 'TxtPinY':
+                    shape_data['txt_pin_y'] = float(prop_value)
+                elif prop_name == 'TxtWidth':
+                    shape_data['txt_width'] = float(prop_value)
+                elif prop_name == 'TxtHeight':
+                    shape_data['txt_height'] = float(prop_value)
+            except (ValueError, TypeError):
+                pass
+
+        # Apply style properties to shape style
+        self._apply_style_properties_to_shape(shape_data, style_properties)
+        
+        # Parse geometry if present
+        geometry_path = self._parse_geometry_sections(shape_elem, shape_data['width'], shape_data['height'])
+        if geometry_path:
+            shape_data['path'] = geometry_path
+        elif shape_data['master_id'] and shape_data['master_id'] in self.masters:
+            # Use master geometry scaled to shape size
+            master = self.masters[shape_data['master_id']]
+            if master['path']:
+                # Scale master path to shape dimensions
+                shape_data['path'] = self._scale_path(master['path'], 
+                                                    shape_data['width'] / master['width'],
+                                                    shape_data['height'] / master['height'])
+
+        # Parse text content - check multiple possible locations
+        text_content = ""
+        
+        # Check v:Text element
+        text_elem = shape_elem.find('.//v:Text', self.namespaces)
+        if text_elem is not None:
+            if text_elem.text:
+                text_content = text_elem.text.strip()
+            # Also check for text in child elements
+            for child in text_elem:
+                if child.text:
+                    text_content += child.text.strip() + " "
+        
+        # If no text found, check text in property values
+        if not text_content:
+            for prop_name, prop_value in shape_data['properties'].items():
+                if 'text' in prop_name.lower() and prop_value and prop_value not in ['0', '1']:
+                    text_content = prop_value
+                    break
+        
+        shape_data['text'] = text_content.strip()
+
+        return shape_data
+
+    def _apply_style_properties_to_shape(self, shape_data, style_properties):
+        """Apply resolved style properties to shape's SVG style."""
+        # Line properties
+        line_props = style_properties.get('line', {})
+        if 'LineColor' in line_props and line_props['LineColor'] in self.colors:
+            shape_data['style']['stroke'] = self.colors[line_props['LineColor']]
+        if 'LineWeight' in line_props:
+            weight = max(0.5, float(line_props['LineWeight']) * self.visio_to_svg_scale)
+            shape_data['style']['stroke_width'] = str(weight)
+        if 'LinePattern' in line_props:
+            # Convert Visio line patterns to SVG stroke-dasharray
+            pattern = line_props['LinePattern']
+            if pattern == '2':  # Dashed
+                shape_data['style']['stroke_dasharray'] = '5,3'
+            elif pattern == '3':  # Dotted
+                shape_data['style']['stroke_dasharray'] = '1,2'
+        
+        # Fill properties
+        fill_props = style_properties.get('fill', {})
+        if 'FillForegnd' in fill_props and fill_props['FillForegnd'] in self.colors:
+            shape_data['style']['fill'] = self.colors[fill_props['FillForegnd']]
+        if 'FillPattern' in fill_props and fill_props['FillPattern'] == '0':
+            shape_data['style']['fill'] = 'none'
+        
+        # Text properties
+        text_props = style_properties.get('text', {})
+        if 'VerticalAlign' in text_props:
+            valign = text_props['VerticalAlign']
+            if valign == '0':
+                shape_data['style']['text_anchor'] = 'start'
+            elif valign == '1':
+                shape_data['style']['text_anchor'] = 'middle'
+            elif valign == '2':
+                shape_data['style']['text_anchor'] = 'end'
+
+    def _generate_css_class(self, style_dict):
+        """Generate a CSS class for the given style properties."""
+        # Create a unique key for this style combination
+        style_key = str(sorted(style_dict.items()))
+        
+        if style_key in self.css_classes:
+            return self.css_classes[style_key]
+        
+        class_name = f"st{self.class_counter}"
+        self.class_counter += 1
+        self.css_classes[style_key] = class_name
+        
+        return class_name
+
+    def _generate_css_styles(self):
+        """Generate CSS style definitions."""
+        css_lines = []
+        
+        for style_key, class_name in self.css_classes.items():
+            # Parse the style key back to dictionary
+            style_dict = dict(eval(style_key))
+            
+            css_props = []
+            for prop, value in style_dict.items():
+                if prop == 'stroke':
+                    css_props.append(f"stroke:{value}")
+                elif prop == 'fill':
+                    css_props.append(f"fill:{value}")
+                elif prop == 'stroke_width':
+                    css_props.append(f"stroke-width:{value}")
+                elif prop == 'stroke_dasharray':
+                    css_props.append(f"stroke-dasharray:{value}")
+                elif prop == 'text_anchor':
+                    css_props.append(f"text-anchor:{value}")
+                elif prop == 'dominant_baseline':
+                    css_props.append(f"dominant-baseline:{value}")
+            
+            if css_props:
+                css_lines.append(f".{class_name} {{ {'; '.join(css_props)}; }}")
+        
+        return '\n'.join(css_lines)
+
+    def _parse_masters(self, zf):
+        """Parse master shape definitions."""
+        print("Parsing master shapes...")
+        
+        # Parse master relationships
+        rel_ns = {'rel': 'http://schemas.openxmlformats.org/package/2006/relationships'}
+        master_rel_map = {}
+        
+        rels_tree = self._get_xml_tree(zf, 'visio/masters/_rels/masters.xml.rels')
+        if rels_tree:
+            for rel in rels_tree.findall('rel:Relationship', rel_ns):
+                master_rel_map[rel.get('Id')] = rel.get('Target')
+
+        masters_tree = self._get_xml_tree(zf, 'visio/masters/masters.xml')
+        if not masters_tree:
+            return
+
+        for master in masters_tree.findall('v:Master', self.namespaces):
+            master_id = master.get('ID')
+            master_name = master.get('NameU', f'Master{master_id}')
+            
+            rel_elem = master.find('v:Rel', self.namespaces)
+            rel_id = rel_elem.get(f'{{{self.namespaces["r"]}}}id') if rel_elem is not None else None
+            
+            if rel_id and rel_id in master_rel_map:
+                master_file_path = f"visio/masters/{master_rel_map[rel_id]}"
+                master_tree = self._get_xml_tree(zf, master_file_path)
+                if master_tree:
+                    master_data = self._parse_master_shape(master_tree, master_id, master_name)
+                    self.masters[master_id] = master_data
+                    print(f"  - Parsed Master {master_id}: {master_name}")
+
+    def _parse_master_shape(self, master_tree, master_id, master_name):
+        """Parse geometry and properties from a master shape."""
+        master_data = {
+            'id': master_id,
+            'name': master_name,
+            'path': '',
+            'width': 1.0,
+            'height': 1.0,
+            'properties': {}
+        }
+
+        # Get dimensions
+        width_cell = master_tree.find('.//v:Cell[@N="Width"]', self.namespaces)
+        height_cell = master_tree.find('.//v:Cell[@N="Height"]', self.namespaces)
+        
+        if width_cell is not None:
+            try:
+                master_data['width'] = float(width_cell.get('V', '1'))
+            except:
+                master_data['width'] = 1.0
+        if height_cell is not None:
+            try:
+                master_data['height'] = float(height_cell.get('V', '1'))
+            except:
+                master_data['height'] = 1.0
+
+        # Parse geometry sections
+        path_data = self._parse_geometry_sections(master_tree, master_data['width'], master_data['height'])
+        master_data['path'] = path_data
+
+        return master_data
+
+    def _parse_geometry_sections(self, tree, shape_width=1.0, shape_height=1.0):
+        """Parse geometry sections and convert to SVG path data."""
+        path_data = ""
+        
+        for geom_section in tree.findall('.//v:Section[@N="Geometry"]', self.namespaces):
+            section_path = ""
+            
+            # Check if this geometry should be drawn
+            no_show_cell = geom_section.find('v:Cell[@N="NoShow"]', self.namespaces)
+            if no_show_cell is not None and no_show_cell.get('V', '0') == '1':
+                continue
+            
+            rows = geom_section.findall('v:Row', self.namespaces)
+            if not rows:
+                continue
+                
+            for row in rows:
+                row_type = row.get('T')
+                
+                x_cell = row.find('v:Cell[@N="X"]', self.namespaces)
+                y_cell = row.find('v:Cell[@N="Y"]', self.namespaces)
+                
+                if x_cell is not None and y_cell is not None:
+                    try:
+                        x = float(x_cell.get('V', '0'))
+                        y = float(y_cell.get('V', '0'))
+                        
+                        # Convert to SVG coordinates (scale and invert Y)
+                        svg_x = x * self.visio_to_svg_scale
+                        svg_y = (shape_height - y) * self.visio_to_svg_scale
+                        
+                        if row_type == 'MoveTo':
+                            section_path += f"M {svg_x:.2f} {svg_y:.2f} "
+                        elif row_type == 'LineTo':
+                            section_path += f"L {svg_x:.2f} {svg_y:.2f} "
+                        elif row_type == 'ArcTo':
+                            # Simple arc handling
+                            section_path += f"L {svg_x:.2f} {svg_y:.2f} "
+                        elif row_type == 'EllipticalArcTo':
+                            section_path += f"L {svg_x:.2f} {svg_y:.2f} "
+                        elif row_type == 'Ellipse':
+                            # Handle ellipse geometry
+                            cx = svg_x
+                            cy = svg_y
+                            rx = shape_width * self.visio_to_svg_scale / 2
+                            ry = shape_height * self.visio_to_svg_scale / 2
+                            section_path += f"M {cx-rx:.2f} {cy:.2f} A {rx:.2f} {ry:.2f} 0 1 1 {cx+rx:.2f} {cy:.2f} A {rx:.2f} {ry:.2f} 0 1 1 {cx-rx:.2f} {cy:.2f} "
+                    except (ValueError, TypeError):
+                        continue
+            
+            # Check if path should be closed
+            no_fill_cell = geom_section.find('v:Cell[@N="NoFill"]', self.namespaces)
+            if section_path and (no_fill_cell is None or no_fill_cell.get('V', '0') == '0'):
+                section_path += "Z "
+            
+            path_data += section_path
+        
+        return path_data.strip()
+
+    def _parse_page_shapes(self):
+        """Parse shapes from the page XML."""
+        print("Parsing page shapes...")
+        
+        # Find page XML
+        page_xml_path = 'visio/pages/page1.xml'
+        try:
+            page_rels_tree = self._get_xml_tree(self.zf, 'visio/pages/_rels/pages.xml.rels')
+            if page_rels_tree is not None:
+                rel_ns = {'rel': 'http://schemas.openxmlformats.org/package/2006/relationships'}
+                first_rel = page_rels_tree.find('.//rel:Relationship', rel_ns)
+                if first_rel is not None:
+                    target = first_rel.get('Target')
+                    if target:
+                        page_xml_path = f'visio/pages/{target}'
+        except:
+            pass
+
+        page_tree = self._get_xml_tree(self.zf, page_xml_path)
+        if page_tree is None:
+            print(f"Error: Could not parse page XML at '{page_xml_path}'")
+            return
+
+        # Find all shapes
+        shapes = page_tree.findall('.//v:Shape', self.namespaces)
+        print(f"Found {len(shapes)} shapes in page")
+        
+        for shape_elem in shapes:
+            shape_data = self._parse_shape(shape_elem)
+            if shape_data:
+                self.shapes[shape_data['id']] = shape_data
+                self.page_shapes.append(shape_data['id'])
+
+    def _scale_path(self, path, scale_x, scale_y):
+        """Scale SVG path coordinates."""
+        if not path:
+            return path
+        
+        import re
+        
+        def scale_coords(match):
+            coords = match.group(1).split()
+            scaled_coords = []
+            for i in range(0, len(coords), 2):
+                if i + 1 < len(coords):
+                    try:
+                        x = float(coords[i]) * scale_x
+                        y = float(coords[i + 1]) * scale_y
+                        scaled_coords.extend([f"{x:.2f}", f"{y:.2f}"])
+                    except:
+                        scaled_coords.extend([coords[i], coords[i + 1]])
+                else:
+                    scaled_coords.append(coords[i])
+            return match.group(0)[0] + " " + " ".join(scaled_coords) + " "
+        
+        # Scale coordinate pairs after M, L, etc.
+        scaled_path = re.sub(r'([ML])\s+([\d\.\-\s]+)', scale_coords, path)
+        return scaled_path
+
+    def _generate_svg_content(self):
+        """Generate SVG content from parsed shapes."""
+        svg_elements = []
+        
+        for shape_id in self.page_shapes:
+            if shape_id not in self.shapes:
+                continue
+                
+            shape = self.shapes[shape_id]
+            svg_element = self._shape_to_svg(shape)
+            if svg_element:
+                svg_elements.append(svg_element)
+        
+        return '\n'.join(svg_elements)
+
+    def _shape_to_svg(self, shape):
+        """Convert a shape to SVG element with CSS classes."""
+        if not shape['path'] and not shape['text'] and shape['width'] <= 0:
+            return None
+            
+        elements = []
+        
+        # Calculate shape position in SVG coordinate system
+        svg_x = shape['x'] * self.visio_to_svg_scale
+        svg_y = (self.page_height / self.visio_to_svg_scale - shape['y']) * self.visio_to_svg_scale
+        
+        # Create transform for the shape
+        transform_parts = []
+        if svg_x != 0 or svg_y != 0:
+            transform_parts.append(f"translate({svg_x:.2f}, {svg_y:.2f})")
+        
+        if shape['angle'] != 0:
+            angle_deg = math.degrees(shape['angle']) if abs(shape['angle']) < 6.28 else shape['angle']
+            transform_parts.append(f"rotate({angle_deg:.2f})")
+        
+        transform_attr = f' transform="{" ".join(transform_parts)}"' if transform_parts else ''
+        
+        # Generate CSS class for this shape's style
+        css_class = self._generate_css_class(shape['style'])
+        
+        # Create group for the shape
+        elements.append(f'<g id="shape-{shape["id"]}" class="{css_class}"{transform_attr}>')
+        
+        # Add path if available
+        if shape['path']:
+            elements.append(f'  <path d="{shape["path"]}"/>')
+        
+        # Add rectangle if no path but has dimensions
+        elif shape['width'] > 0 and shape['height'] > 0:
+            width_px = shape['width'] * self.visio_to_svg_scale
+            height_px = shape['height'] * self.visio_to_svg_scale
+            
+            # Position rectangle relative to shape's pin point
+            rect_x = -shape['loc_pin_x'] * self.visio_to_svg_scale
+            rect_y = -(shape['height'] - shape['loc_pin_y']) * self.visio_to_svg_scale
+            
+            elements.append(f'  <rect x="{rect_x:.2f}" y="{rect_y:.2f}" '
+                          f'width="{width_px:.2f}" height="{height_px:.2f}"/>')
+        
+        # Add text if available
+        if shape['text']:
+            # Calculate text position
+            text_x = (shape['txt_pin_x'] - shape['x']) * self.visio_to_svg_scale if shape['txt_pin_x'] != 0 else 0
+            text_y = (shape['y'] - shape['txt_pin_y']) * self.visio_to_svg_scale if shape['txt_pin_y'] != 0 else 0
+            
+            # Clean up text content
+            clean_text = shape['text'].replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            
+            text_style = dict(shape['style'])
+            text_css_class = self._generate_css_class(text_style)
+            
+            elements.append(f'  <text x="{text_x:.2f}" y="{text_y:.2f}" '
+                          f'class="{text_css_class}">'
+                          f'{clean_text}</text>')
+        
+        elements.append('</g>')
+        
+        return '\n'.join(elements)
+
+    def convert(self):
+        """Main conversion method with enhanced style support."""
+        print(f"Starting enhanced conversion of '{self.vsdx_file_path}'...")
+        
+        try:
+            self.zf = zipfile.ZipFile(self.vsdx_file_path, 'r')
+        except Exception as e:
+            print(f"Error opening VSDX file: {e}")
+            return None
+
+        try:
+            # Parse document components in correct order
+            self._parse_colors(self.zf)
+            self._parse_styles(self.zf)
+            self._parse_page_styles(self.zf)
+            self._parse_masters(self.zf)
+            self._parse_page_shapes()
+            
+            # Generate SVG content
+            shapes_svg = self._generate_svg_content()
+            css_styles = self._generate_css_styles()
+            
+            # Create complete SVG document
+            svg_content = f'''<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="{self.page_width:.0f}" 
+     height="{self.page_height:.0f}" 
+     viewBox="0 0 {self.page_width:.0f} {self.page_height:.0f}">
+  <title>Converted from VSDX</title>
+  <desc>Generated by Enhanced VSDX to SVG Converter v3</desc>
+  
+  <!-- Define styles -->
+  <style type="text/css">
+    <![CDATA[
+{css_styles}
+    
+    /* Default Visio shape styles */
+    .visio-shape {{
+      fill: white;
+      stroke: black;
+      stroke-width: 1;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }}
+    .visio-text {{
+      font-family: Arial, sans-serif;
+      font-size: 10px;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      fill: black;
+    }}
+    ]]>
+  </style>
+  
+  <!-- Shapes -->
+{shapes_svg}
+  
+</svg>'''
+            
+            print(f"Successfully converted {len(self.shapes)} shapes with {len(self.css_classes)} style classes")
+            return svg_content
+
+        except Exception as e:
+            print(f"Error during conversion: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+
+        finally:
+            if self.zf:
+                self.zf.close()
+
+
+# Usage example
 if __name__ == '__main__':
-    # 1. Replace this with the path to your .vsdx file
-    input_vsdx_file = "diagram.vsdx"
-    
-    # 2. Replace this with your desired output file name
-    output_svg_file = "output.svg"
+    input_vsdx_file = "diagram.vsdx"  # Replace with your VSDX file path
+    output_svg_file = "output.svg"    # Replace with desired output path
 
-    print(f"Starting conversion of '{input_vsdx_file}'...")
-    
     converter = VsdxToSvgConverter(input_vsdx_file)
     svg_data = converter.convert()
 
